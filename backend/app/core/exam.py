@@ -13,8 +13,9 @@ class Exam():
         self.file_name = file_name
         self.has_corrector = has_corrector
 
-    def create_document(self, is_corrector):
-        word = Word(
+
+    def _write_word(self, is_corrector: bool) -> None:
+        Word(
             self.document_title,
             self.document_header,
             self.number_on_document,
@@ -26,14 +27,13 @@ class Exam():
             self.destination_path,
             self.file_name
         )        
-        word.write()
 
 
-    def write_word(self):
-        self.create_document(False)
+    def write(self) -> None:
+        self._write_word(is_corrector=False)
         
         if self.has_corrector:
-            self.create_document(True)
+            self._write_word(is_corrector=True)
 
 
             

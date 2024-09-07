@@ -20,15 +20,12 @@ class Word():
         self.destination = destination
         self.file_name = file_name
         self.doc = None
+        self._create_word_document()
+        self._write_word_document()
+        self._save_word_document()
 
-
-    def write(self):
-        self.create_word()
-        self.write_in_word()
-        self.save_word()
-
-
-    def create_word(self) -> object:
+        
+    def _create_word_document(self) -> None:
         self.doc = Document()
 
         ### SET WORD
@@ -73,11 +70,11 @@ class Word():
         ####
 
 
-    def write_in_word(self) -> None:
+    def _write_word_document(self) -> None:
         for index, question in enumerate(self.questions):
             header_question = (f"{index + 1}) " if self.number_questions else "") + question['question']
             h = self.doc.add_heading(header_question, 3)
-            self.format_heading_question(h)
+            self._format_heading_question(h)
             
             for i in range(0, self.options_supported):
                 p = self.doc.add_paragraph(style='List Bullet')
@@ -88,12 +85,12 @@ class Word():
                     r.underline = question['options'][i]['correct']
 
                 
-    def save_word(self): 
+    def _save_word_document(self) -> None: 
         suffix = "_solutions" if self.solution else ""
         self.doc.save(f"{self.destination}/{self.file_name}_{str(self.exam_number)}{suffix}.docx")    
 
 
-    def format_heading_question(self, header_question):
+    def _format_heading_question(self, header_question: object) -> None:
         for run in header_question.runs:
             run.font.color.rgb = RGBColor(0, 0, 0)
             run.bold = True

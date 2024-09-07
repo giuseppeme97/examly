@@ -1,6 +1,6 @@
 from core.examsgenerator import ExamsGenerator
-from core.config import settings
+from core.config import config
 
 if __name__ == "__main__":
-     ExamsGenerator(settings, True)
+     ExamsGenerator(config, autoload=True, autostart=True)
 

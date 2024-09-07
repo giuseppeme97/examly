@@ -5,10 +5,13 @@ import os
 import zipfile
 import openpyxl
 from openpyxl.styles import Side, Border
+from pathlib import Path
 
 class ExamsGenerator():
-    def __init__(self, config: dict, autoload=False, autostart=False, interactive=False) -> None:
+    def __init__(self, config: dict, autoload=False, autostart=False) -> None:
         self.config = config
+        self.config["destination_path"] = os.path.expandvars(self.config["destination_path"])
+        Path(self.config["destination_path"]).mkdir(parents=True, exist_ok=True)
         if autoload: self.load_source()
         if autostart: self.generate()
 
@@ -28,7 +31,7 @@ class ExamsGenerator():
             assert "Sorgente dati non corretta."
             return
         
-        print("Sorgente caricata.")
+        print("Sorgente caricata.\n")
 
 
     def get_subjects(self) -> list:
@@ -62,15 +65,17 @@ class ExamsGenerator():
             cell = sheet.cell(row=1, column=col_num, value=header)
             cell.border = Border(bottom=Side(style='thin', color='000000'))
         
-        os.makedirs(self.config["template_path"], exist_ok=True)
+        Path(self.config["template_path"]).mkdir(parents=True, exist_ok=True)
         template_path = f"{self.config['template_path']}/{self.config['template_name']}"                
         workbook.save(template_path)
         return template_path
     
-    def check_row(self, row: object) -> bool:
+
+    def _check_row(self, row: object) -> bool:
         base = (
             row[self.config['subject_denomination']] in self.config['subject'] and
-            row[self.config['classroom_denomination']] in self.config['classroom']
+            row[self.config['classroom_denomination']] in self.config['classroom'] and
+            row[self.config['sector_denomination']] in self.config['sector']
         )
 
         if self.config['single_inclusion']:
@@ -81,11 +86,11 @@ class ExamsGenerator():
             return base
 
             
-    def pool_questions(self) -> None:
+    def _pool_questions(self) -> None:
         self.questions = []
         
         for _, row in self.df.iterrows():
-            if (self.check_row(row)):
+            if (self._check_row(row)):
                 question = {
                     "question": str(row[self.config['question_denomination']]),
                     "options": []
@@ -98,7 +103,7 @@ class ExamsGenerator():
                 self.questions.append(question)
 
 
-    def sample_questions(self) -> list:
+    def _sample_questions(self) -> list:
         if self.config['shuffle_questions']:
             random.shuffle(self.questions)
         
@@ -109,10 +114,10 @@ class ExamsGenerator():
         return self.questions[0: self.config['number_of_questions']]
     
 
-    def write_exams(self) -> None:
+    def _write_exams(self) -> None:
         for i in range(0, self.config["number_of_exams"]):
             exam = Exam(
-                questions=self.sample_questions(), 
+                questions=self._sample_questions(), 
                 exam_number=i + 1, 
                 document_title=self.config["document_title"],
                 document_header=self.config["document_header"],
@@ -122,11 +127,11 @@ class ExamsGenerator():
                 destination_path=self.config["destination_path"],
                 file_name=self.config["file_name"], 
                 has_corrector=self.config["export_solutions"])
-            exam.write_word()
+            exam.write()
             print(f"Generato esame {i + 1}...")
 
 
-    def zip_exams(self) -> None:
+    def _zip_exams(self) -> None:
         zip_name = f"{self.config['zip_name']}.zip"
         with zipfile.ZipFile(f"{self.config['destination_path']}/{zip_name}", 'w') as zipf:
             for file in os.listdir(self.config["destination_path"]):
@@ -137,9 +142,9 @@ class ExamsGenerator():
 
 
     def generate(self) -> None:
-        self.pool_questions()
-        self.write_exams()
-        if self.config["include_to_zip"]: self.zip_exams()
+        self._pool_questions()
+        self._write_exams()
+        if self.config["include_to_zip"]: self._zip_exams()
 
         
 
