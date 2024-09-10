@@ -3,7 +3,7 @@ from fastapi import UploadFile, BackgroundTasks
 from utils.utils import save_source, get_hash_file, delete_file, delete_folder, get_paths
 from models.settings import UserSettings
 from core.examsgenerator import ExamsGenerator
-from core.config import settings
+from core.config import config
 from fastapi.responses import FileResponse
 from utils.params import UPLOADED, TEMPLATE
 
@@ -16,7 +16,7 @@ router = APIRouter(
 def generate_exams(user_settings: UserSettings, background_tasks: BackgroundTasks): 
     source_path, destination_path = get_paths(user_settings.source_name, UPLOADED)
     
-    settings.update({
+    config.update({
         "destination_path": destination_path,
         "source_path": source_path,
         "include_to_zip": True,
@@ -35,7 +35,7 @@ def generate_exams(user_settings: UserSettings, background_tasks: BackgroundTask
         "zip_name": user_settings.zip_name,
     })
 
-    ExamsGenerator(settings, autoload=True, autostart=True)
+    ExamsGenerator(config, autoload=True, autostart=True)
     zip_path = f"{destination_path}/{user_settings.zip_name}.zip"
     background_tasks.add_task(delete_folder, destination_path)
     return FileResponse(path=zip_path, media_type='application/octet-stream')
@@ -43,7 +43,7 @@ def generate_exams(user_settings: UserSettings, background_tasks: BackgroundTask
 
 @router.get("/download-template/")
 def download_template(background_tasks: BackgroundTasks): 
-    gen = ExamsGenerator(settings, autoload=False, autostart=False)
+    gen = ExamsGenerator(config, autoload=False, autostart=False)
     template_path = gen.get_template()
     background_tasks.add_task(delete_file, template_path)
     return FileResponse(path=template_path, media_type='application/octet-stream',filename=TEMPLATE)
@@ -52,9 +52,9 @@ def download_template(background_tasks: BackgroundTasks):
 @router.post("/load-source/")
 def load_source(file_object: UploadFile):     
     source_name, source_path = save_source(file_object, UPLOADED)
-    settings.update({"source_path": source_path})
+    config.update({"source_path": source_path})
     
-    gen = ExamsGenerator(settings, autoload=True, autostart=False)
+    gen = ExamsGenerator(config, autoload=True, autostart=False)
     response = {
         "sourceName": source_name,
         "sha256": get_hash_file(source_path), 

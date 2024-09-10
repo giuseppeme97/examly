@@ -73,9 +73,9 @@ class ExamsGenerator():
 
     def _check_row(self, row: object) -> bool:
         base = (
-            row[self.config['subject_denomination']] in self.config['subject'] and
-            row[self.config['classroom_denomination']] in self.config['classroom'] and
-            row[self.config['sector_denomination']] in self.config['sector']
+            row[self.config['subject_denomination']] in self.config['subject'] if len(self.config['subject']) > 0 else True and
+            row[self.config['classroom_denomination']] in self.config['classroom'] if len(self.config['classroom']) > 0 else True and
+            row[self.config['sector_denomination']] in self.config['sector'] if(len(self.config['sector'])) > 0 else True
         )
 
         if self.config['single_inclusion']:
