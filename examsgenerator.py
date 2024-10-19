@@ -6,11 +6,12 @@ import openpyxl
 from openpyxl.styles import Side, Border
 from pathlib import Path
 from word import Word
+import json
 
 
 class ExamsGenerator():
-    def __init__(self, config: dict) -> None:
-        self.config = config
+    def __init__(self) -> None:
+        self.config = self.load_config()
 
 
     # Starts automatically the generation of the exams
@@ -26,8 +27,13 @@ class ExamsGenerator():
         self.config = config
 
 
+    # Loads the configuration
+    def load_config(self) -> bool:
+        with open("config.json") as file:
+            return json.load(file)
+
+
     # Loads the source of all questions from various types of files (.xlsx, .csv)
-    # TODO: catch exceptions
     def load_source(self) -> bool:
         _, ext = os.path.splitext(self.config["source_path"])
             
@@ -98,6 +104,7 @@ class ExamsGenerator():
             return base and (row[self.config['include_denomination']] == self.config['include_accept_denomination'])
         else:
             return base
+
 
     # Creates the pool of questions that fit with the params inside the configuration
     def _pool_questions(self) -> None:
@@ -175,6 +182,8 @@ class ExamsGenerator():
         self._write_exams()
         if self.config["include_to_zip"]: self._zip_exams()
 
-        
 
+if __name__ == "__main__":
+     e = ExamsGenerator()
+     e.start()
         
