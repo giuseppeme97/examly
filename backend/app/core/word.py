@@ -3,7 +3,7 @@ from docx.document import WD_SECTION
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement, ns
-from docx.shared import Pt, RGBColor
+from docx.shared import Pt, RGBColor, Cm
 import docx
 
 
@@ -20,36 +20,43 @@ class Word():
         self.destination = destination
         self.file_name = file_name
         self.doc = None
-        self._create_word_document()
+        self._set_word_document()
         self._write_word_document()
         self._save_word_document()
 
         
-    def _create_word_document(self) -> None:
+    def _set_word_document(self) -> None:
         self.doc = Document()
 
-        ### SET WORD
+        # Imposta il font del documento
+        styles = self.doc.styles['Normal']
+        font = styles.font
+        font.name = 'Liberation Sans'
+        
+        # Imposta la lingua del documento
         styles_element = self.doc.styles.element
         rpr_default = styles_element.xpath('./w:docDefaults/w:rPrDefault/w:rPr')[0]
         lang_default = rpr_default.xpath('w:lang')[0]
         lang_default.set(docx.oxml.shared.qn('w:val'),'it-IT')
         
+        # Imposta il titolo del documento
         par = self.doc.add_paragraph(self.title_document + f" - #{self.exam_number}") if self.number_header_document else self.doc.add_paragraph(self.title_document)
-
-        #par.style = doc.styles['Title']
         for run in par.runs:
             run.bold = True
             run.font.size = Pt(15)
-        
         par.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        # Imposta i margini del documento
         section = self.doc.sections[0]
+        section.left_margin = Cm(1)
+        section.right_margin = Cm(1)
+        
+        # Imposta l'intestazione del documento
         upper = section.header
         paragraph = upper.paragraphs[0]
         paragraph.text = self.header_document        
-        paragraph.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
-        ## ADD PAGE
-        # self.add_page_number(doc.sections[0].footer.paragraphs[0].add_run())
+        ## Aggiunge numero di pagina
         fldChar1 = OxmlElement('w:fldChar')
         fldChar1.set(ns.qn('w:fldCharType'), 'begin')
         instrText = OxmlElement('w:instrText')
@@ -60,22 +67,29 @@ class Word():
         self.doc.sections[0].footer.paragraphs[0].add_run()._r.append(fldChar1)
         self.doc.sections[0].footer.paragraphs[0].add_run()._r.append(instrText)
         self.doc.sections[0].footer.paragraphs[0].add_run()._r.append(fldChar2)
-        # ADD PAGE
         
+        # Aggiunge nuova sezione con due colonne
         self.doc.add_section(WD_SECTION.CONTINUOUS)
         section = self.doc.sections[1]
         sectPr = section._sectPr
         cols = sectPr.xpath('./w:cols')[0]
         cols.set(qn('w:num'),'2')
-        ####
 
 
     def _write_word_document(self) -> None:
         for index, question in enumerate(self.questions):
             header_question = (f"{index + 1}) " if self.number_questions else "") + question['question']
-            h = self.doc.add_heading(header_question, 3)
-            self._format_heading_question(h)
             
+            # Aggiunge il titolo della domanda
+            h = self.doc.add_heading(header_question, 3)
+            for run in h.runs:
+                run.font.color.rgb = RGBColor(0, 0, 0)
+                run.bold = True
+                run.font.name = 'Liberation Sans'
+                run.font.size = Pt(11)
+            h.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+            
+            # Aggiunge le opzioni alla domanda
             for i in range(0, self.options_supported):
                 p = self.doc.add_paragraph(style='List Bullet')
                 r = p.add_run(question['options'][i]['text'])
@@ -89,11 +103,4 @@ class Word():
         suffix = "_solutions" if self.solution else ""
         self.doc.save(f"{self.destination}/{self.file_name}_{str(self.exam_number)}{suffix}.docx")    
 
-
-    def _format_heading_question(self, header_question: object) -> None:
-        for run in header_question.runs:
-            run.font.color.rgb = RGBColor(0, 0, 0)
-            run.bold = True
-            run.font.size = Pt(11)
-        header_question.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
 
