@@ -1,26 +1,34 @@
 import pandas as pd
-from exam import Exam
 import random
 import os
 import zipfile
 import openpyxl
 from openpyxl.styles import Side, Border
 from pathlib import Path
+from word import Word
+
 
 class ExamsGenerator():
-    def __init__(self, config: dict, autoload=False, autostart=False) -> None:
+    def __init__(self, config: dict) -> None:
         self.config = config
-        self.config["destination_path"] = os.path.expandvars(self.config["destination_path"])
-        Path(self.config["destination_path"]).mkdir(parents=True, exist_ok=True)
-        if autoload: self.load_source()
-        if autostart: self.generate()
+
+
+    # Starts automatically the generation of the exams
+    def start(self):
+        if self.load_source():
+            self.generate()
+        else:
+            print("Errore nel caricamento della sorgente delle domande.")
 
     
+    # Updates the loaded configurations
     def set_config(self, config: dict) -> None:
         self.config = config
 
 
-    def load_source(self) -> None:
+    # Loads the source of all questions from various types of files (.xlsx, .csv)
+    # TODO: catch exceptions
+    def load_source(self) -> bool:
         _, ext = os.path.splitext(self.config["source_path"])
             
         if ext in self.config["supported_excel_formats"]:
@@ -28,30 +36,36 @@ class ExamsGenerator():
         elif ext in self.config["supported_table_formats"]:
             self.df = pd.read_csv(self.config["source_path"],  sep=";")
         else:
-            assert "Sorgente dati non corretta."
-            return
+            return False
         
         print("Sorgente caricata.\n")
+        return True
 
 
+    # Gets the list of all subjects inside the source of questions
     def get_subjects(self) -> list:
         return sorted(pd.Series(self.df[self.config["subject_denomination"]].unique()).dropna().tolist()) 
 
 
+    # Gets the list of all different classrooms inside the source of questions
     def get_classrooms(self) -> list:
         return sorted(list(map(int, pd.Series(self.df[self.config["classroom_denomination"]].unique()).dropna().tolist())))
 
 
+    # Gets the number of questions inside the source
     def get_rows(self) -> int:
         return self.df.shape[0]
 
 
+    # Generate a new .xlsx file to be used for a new source of questions
     def get_template(self) -> str:
         workbook = openpyxl.Workbook()
         sheet = workbook.active
         headers = [
             f"{self.config['subject_denomination']}", 
-            f"{self.config['classroom_denomination']}", 
+            f"{self.config['classroom_denomination']}",
+            f"{self.config['era_denomination']}",
+            f"{self.config['sector_denomination']}", 
             f"{self.config['include_denomination']}", 
             f"{self.config['question_denomination']}", 
             f"{self.config['solution_denomination']}", 
@@ -71,6 +85,7 @@ class ExamsGenerator():
         return template_path
     
 
+    # Checks if the i-question respects the params inside the configuration
     def _check_row(self, row: object) -> bool:
         base = (
             ((row[self.config['subject_denomination']] in self.config['subject']) if len(self.config['subject']) > 0 else True) and
@@ -80,13 +95,11 @@ class ExamsGenerator():
         )
 
         if self.config['single_inclusion']:
-            return base and (
-                row[self.config['include_denomination']] == self.config['include_accept_denomination']
-            )
+            return base and (row[self.config['include_denomination']] == self.config['include_accept_denomination'])
         else:
             return base
 
-            
+    # Creates the pool of questions that fit with the params inside the configuration
     def _pool_questions(self) -> None:
         self.questions = []
         
@@ -104,6 +117,7 @@ class ExamsGenerator():
                 self.questions.append(question)
 
 
+    # Samples randomically a determinated number of questions from the pool
     def _sample_questions(self) -> list:
         if self.config['shuffle_questions']:
             random.shuffle(self.questions)
@@ -115,21 +129,35 @@ class ExamsGenerator():
         return self.questions[0: self.config['number_of_questions']]
     
 
+    # Generates a new .docx with the sampled questions
+    def _write_exam(self, questions: list, exam_number: int, solutions: bool) -> None:
+        Word(
+                questions,
+                exam_number,
+                solutions,
+                self.config["document_title"],
+                self.config["document_header"],
+                self.config["number_on_document"],
+                self.config["number_on_questions"],
+                self.config["number_of_options"],
+                self.config["destination_path"],
+                self.config["file_name"]
+        )
+    
+
+    # Generate multiple .docx documents, sampling new questions for every new document
     def _write_exams(self) -> None:
+        Path(self.config["destination_path"]).mkdir(parents=True, exist_ok=True)
+        questions = self._sample_questions()
+        
         for i in range(0, self.config["number_of_exams"]):
-            exam = Exam(
-                questions=self._sample_questions(), 
-                exam_number=i + 1, 
-                document_title=self.config["document_title"],
-                document_header=self.config["document_header"],
-                number_on_document=self.config["number_on_document"],
-                number_on_questions=self.config["number_on_questions"],
-                number_of_options=self.config["number_of_options"],
-                destination_path=self.config["destination_path"],
-                file_name=self.config["file_name"], 
-                has_corrector=self.config["export_solutions"])
-            exam.write()
-            print(f"Generato esame {i + 1}...")
+            exam_number = i + 1
+            self._write_exam(questions, exam_number, False)
+
+            if self.config["export_solutions"]:
+                self._write_exam(questions, exam_number, True)
+            
+            print(f"Generato esame {exam_number}...")
 
 
     def _zip_exams(self) -> None:

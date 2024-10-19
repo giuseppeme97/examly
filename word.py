@@ -8,14 +8,14 @@ import docx
 
 
 class Word():
-    def __init__(self, title_document, header_document, number_header_document, exam_number, questions, number_questions, solution, options_supported, destination, file_name) -> None:
+    def __init__(self, questions, exam_number, solutions, title_document, header_document, number_header_document, number_questions, options_supported, destination, file_name) -> None:
         self.title_document = title_document
         self.header_document = header_document
         self.number_header_document = number_header_document
         self.exam_number = exam_number
         self.questions = questions
         self.number_questions = number_questions
-        self.solution = solution
+        self.solutions = solutions
         self.options_supported = options_supported
         self.destination = destination
         self.file_name = file_name
@@ -94,13 +94,13 @@ class Word():
                 p = self.doc.add_paragraph(style='List Bullet')
                 r = p.add_run(question['options'][i]['text'])
                 p.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
-                if self.solution:
+                if self.solutions:
                     r.bold = question['options'][i]['correct']
                     r.underline = question['options'][i]['correct']
 
                 
     def _save_word_document(self) -> None: 
-        suffix = "_solutions" if self.solution else ""
+        suffix = "_solutions" if self.solutions else ""
         self.doc.save(f"{self.destination}/{self.file_name}_{str(self.exam_number)}{suffix}.docx")    
 
 
