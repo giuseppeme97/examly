@@ -1,2 +1,4 @@
 .DS_Store
 Domande.xlsx
+__pycache__/
+venv/

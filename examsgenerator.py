@@ -1,5 +1,5 @@
 import pandas as pd
-from core.exam import Exam
+from exam import Exam
 import random
 import os
 import zipfile
