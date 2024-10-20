@@ -10,12 +10,16 @@ import json
 import sys
 
 
-class ExamsGenerator():
-    def __init__(self) -> None:
-        self.documents_config, self.word_config = self.get_configs()
+class Examly():
+    def __init__(self, config_filename) -> None:
+        self.documents_config, self.word_config = self.get_configs(config_filename)
 
 
-    def start(self):
+    def show_menu(self) -> None:
+        pass
+
+
+    def start(self) -> None:
         if self.load_source():
             filtered_questions = self.filter_questions()
             self.write_exams(filtered_questions)
@@ -33,22 +37,22 @@ class ExamsGenerator():
             return json.load(file)
         
 
-    def get_configs(self) -> tuple[dict]:
+    def get_configs(self, config_filename: str) -> tuple[dict]:
         if getattr(sys, 'frozen', False):
             base_path = os.path.dirname(sys.executable)
         else:
             base_path = os.path.dirname(os.path.abspath(__file__))
 
-        documents_config_path = f"{base_path}/documents_config.json"
-        word_config_path = f"{base_path}/word_config.json"
-        
-        documents_config = self.load_config(documents_config_path)
-        word_config = self.load_config(word_config_path)
-        documents_config['source_path'] = f"{base_path}/{documents_config['source_path']}"
-        documents_config['document_path'] = f"{base_path}/{documents_config['document_path']}"
-        documents_config['template_path'] = f"{base_path}/{documents_config['template_path']}"
-        
-        return (documents_config, word_config)
+        document_config = self.load_config(f"{base_path}/{config_filename}")
+        word_config = document_config["word"]
+        document_config['source_path'] = f"{base_path}/{document_config['source_path']}"
+        document_config['document_path'] = f"{base_path}/{document_config['document_path']}"
+        document_config['template_path'] = f"{base_path}/{document_config['template_path']}"
+        return (document_config, word_config)
+    
+
+    def check_source(self) -> None:
+        pass
 
 
     def load_source(self) -> bool:
@@ -57,9 +61,12 @@ class ExamsGenerator():
         if ext in self.documents_config["excel_formats_supported"]:
             self.df = pd.read_excel(self.documents_config["source_path"])
         elif ext in self.documents_config["table_formats_supported"]:
-            self.df = pd.read_csv(self.documents_config["source_path"],  sep=";")
+            self.df = pd.read_csv(self.documents_config["source_path"], sep=";")
         else:
             return False
+        
+        # TODO: controllare la validità di tutte le righe
+        # self.check_source()
         
         print("Sorgente caricata.\n")
         return True
@@ -190,6 +197,6 @@ class ExamsGenerator():
 
 
 if __name__ == "__main__":
-     e = ExamsGenerator()
+     e = Examly("config.json")
      e.start()
         
