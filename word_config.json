@@ -1,0 +1,13 @@
+{
+    "font": "Liberation Sans",
+    "language": "it-IT",
+    "title_size": 15,    
+    "questions_size": 11,
+    "questions_distance": 3,
+    "questions_RGB_color": [0, 0, 0],
+    "columns_number": 2,
+    "left_margin": 1,
+    "right_margin": 1,
+    "are_pages_numbered": true,
+    "DSA": false
+}

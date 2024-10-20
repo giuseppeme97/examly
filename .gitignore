@@ -3,3 +3,5 @@ Domande.xlsx
 __pycache__/
 venv/
 output/
+build/
+dist/

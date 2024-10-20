@@ -8,55 +8,44 @@ import docx
 
 
 class Word():
-    def __init__(self, questions, exam_number, solutions, title_document, header_document, number_header_document, number_questions, options_supported, destination, file_name) -> None:
-        self.title_document = title_document
-        self.header_document = header_document
-        self.number_header_document = number_header_document
-        self.exam_number = exam_number
-        self.questions = questions
-        self.number_questions = number_questions
-        self.solutions = solutions
-        self.options_supported = options_supported
-        self.destination = destination
-        self.file_name = file_name
-        self.doc = None
-        self._set_word_document()
-        self._write_word_document()
-        self._save_word_document()
-
-        
-    def _set_word_document(self) -> None:
+    def __init__(self, config: dict, questions: list, document_number: int, is_document_solution: bool, document_title: str, document_header: str, is_document_numbered: bool, are_questions_numbered: bool, document_path: str, document_filename: str) -> None:
+        self.config = config
+        self.is_document_solution = is_document_solution
         self.doc = Document()
 
-        # Imposta il font del documento
-        styles = self.doc.styles['Normal']
-        font = styles.font
-        font.name = 'Liberation Sans'
-        
-        # Imposta la lingua del documento
-        styles_element = self.doc.styles.element
-        rpr_default = styles_element.xpath('./w:docDefaults/w:rPrDefault/w:rPr')[0]
-        lang_default = rpr_default.xpath('w:lang')[0]
-        lang_default.set(docx.oxml.shared.qn('w:val'),'it-IT')
-        
-        # Imposta il titolo del documento
-        par = self.doc.add_paragraph(self.title_document + f" - #{self.exam_number}") if self.number_header_document else self.doc.add_paragraph(self.title_document)
-        for run in par.runs:
-            run.bold = True
-            run.font.size = Pt(15)
-        par.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        
-        # Imposta i margini del documento
-        section = self.doc.sections[0]
-        section.left_margin = Cm(1)
-        section.right_margin = Cm(1)
-        
-        # Imposta l'intestazione del documento
-        upper = section.header
-        paragraph = upper.paragraphs[0]
-        paragraph.text = self.header_document        
+        self.set_font(self.config["font"])
+        self.set_language(self.config["language"])
+        self.set_margin(self.config["left_margin"], self.config["right_margin"])
+        self.set_header(document_header)                
+        self.set_title(document_title, self.config["title_size"], is_document_numbered, document_number)    
+        if self.config["are_pages_numbered"]: self.set_number_page()                
+        self.set_columns(self.config["columns_number"])
+        self.write_questions(self.config["font"], self.config["questions_size"], questions, are_questions_numbered)
+        self.save_document(document_path, document_filename, document_number)
 
-        ## Aggiunge numero di pagina
+
+    def set_font(self, font: str) -> None:
+        self.doc.styles['Normal'].font.name = font
+
+
+    def set_language(self, language: str) -> None:
+        self.doc.styles.element.xpath('./w:docDefaults/w:rPrDefault/w:rPr')[0].xpath('w:lang')[0].set(docx.oxml.shared.qn('w:val'), language)
+
+
+    def set_title(self, document_title: str, title_size: int, is_document_numbered: bool, document_number: int) -> None:
+        paragraph = self.doc.add_paragraph(document_title + f" - #{document_number}") if is_document_numbered else self.doc.add_paragraph(document_title)
+        for run in paragraph.runs:
+            run.bold = True
+            run.font.size = Pt(title_size)
+        paragraph.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+
+    def set_margin(self, left_margin: int, right_margin: int) -> None:
+        self.doc.sections[0].left_margin = Cm(left_margin)
+        self.doc.sections[0].right_margin = Cm(right_margin)
+
+
+    def set_number_page(self) -> None:
         fldChar1 = OxmlElement('w:fldChar')
         fldChar1.set(ns.qn('w:fldCharType'), 'begin')
         instrText = OxmlElement('w:instrText')
@@ -67,40 +56,47 @@ class Word():
         self.doc.sections[0].footer.paragraphs[0].add_run()._r.append(fldChar1)
         self.doc.sections[0].footer.paragraphs[0].add_run()._r.append(instrText)
         self.doc.sections[0].footer.paragraphs[0].add_run()._r.append(fldChar2)
-        
-        # Aggiunge nuova sezione con due colonne
+
+
+    def set_header(self, document_header: str) -> None:
+        self.doc.sections[0].header.paragraphs[0].text = document_header
+
+
+    def set_columns(self, columns_number: int) -> None:
         self.doc.add_section(WD_SECTION.CONTINUOUS)
-        section = self.doc.sections[1]
-        sectPr = section._sectPr
-        cols = sectPr.xpath('./w:cols')[0]
-        cols.set(qn('w:num'),'2')
+        self.doc.sections[1]._sectPr.xpath('./w:cols')[0].set(qn('w:num'), str(columns_number))
 
 
-    def _write_word_document(self) -> None:
-        for index, question in enumerate(self.questions):
-            header_question = (f"{index + 1}) " if self.number_questions else "") + question['question']
+    def add_question_header(self, font: str, question_size: int, question_header: str) -> None: 
+        header = self.doc.add_heading(question_header, 3) #???
+        for run in header.runs:
+            run.font.color.rgb = RGBColor(0, 0, 0)
+            run.bold = True
+            run.font.name = font
+            run.font.size = Pt(question_size)
+        header.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+
+
+    def add_question_option(self, option: dict) -> None:
+        paragraph = self.doc.add_paragraph(option['text'], style='List Bullet')
+        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+        if self.is_document_solution:
+            for run in paragraph.runs:
+                run.bold = option["correct"]
+                run.underline = option["correct"]
+        
+
+    def write_questions(self, font: str, questions_size: int, questions: list, are_questions_numbered: bool) -> None:
+        for index, question in enumerate(questions):
+            question_header = (f"{index + 1}) " if are_questions_numbered else "") + question['question']
             
-            # Aggiunge il titolo della domanda
-            h = self.doc.add_heading(header_question, 3)
-            for run in h.runs:
-                run.font.color.rgb = RGBColor(0, 0, 0)
-                run.bold = True
-                run.font.name = 'Liberation Sans'
-                run.font.size = Pt(11)
-            h.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
-            
-            # Aggiunge le opzioni alla domanda
-            for i in range(0, self.options_supported):
-                p = self.doc.add_paragraph(style='List Bullet')
-                r = p.add_run(question['options'][i]['text'])
-                p.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
-                if self.solutions:
-                    r.bold = question['options'][i]['correct']
-                    r.underline = question['options'][i]['correct']
+            self.add_question_header(font, questions_size, question_header)
+            for option in question['options']:
+                self.add_question_option(option)
 
                 
-    def _save_word_document(self) -> None: 
-        suffix = "_solutions" if self.solutions else ""
-        self.doc.save(f"{self.destination}/{self.file_name}_{str(self.exam_number)}{suffix}.docx")    
+    def save_document(self, document_path: str, document_filename: str, document_number: int) -> None: 
+        suffix = "_solutions" if self.is_document_solution else ""
+        self.doc.save(f"{document_path}/{document_filename}_{str(document_number)}{suffix}.docx")    
 
 
