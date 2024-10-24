@@ -5,24 +5,29 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement, ns
 from docx.shared import Pt, RGBColor, Cm
 import docx
+from docx.shared import Inches
 
 
 class Word():
-    def __init__(self, config: dict, questions: list, document_number: int, is_document_solution: bool, document_title: str, document_header: str, is_document_numbered: bool, are_questions_numbered: bool, document_path: str, document_filename: str) -> None:
+    def __init__(self, config: dict, questions: list, document_number: int, is_document_solution: bool) -> None:
         self.config = config
+        self.questions = questions
+        self.document_number = document_number
         self.is_document_solution = is_document_solution
         self.doc = Document()
+        self.set_config()
 
-        self.set_font(self.config["font"])
-        self.set_language(self.config["language"])
-        self.set_margin(self.config["left_margin"], self.config["right_margin"])
-        self.set_header(document_header)                
-        self.set_title(document_title, self.config["title_size"], is_document_numbered, document_number)    
+
+    def set_config(self) -> None:
+        self.set_font(self.config["word"]["font"])
+        self.set_language(self.config["word"]["language"])
+        self.set_margin(self.config["word"]["left_margin"], self.config["word"]["right_margin"])
+        self.set_header(self.config["document_header"])                
+        self.set_title(self.config["document_title"], self.config["word"]["title_size"], self.config["are_documents_numbered"], self.document_number)    
         if self.config["are_pages_numbered"]: self.set_number_page()                
-        self.set_columns(self.config["columns_number"])
-        self.write_questions(self.config["font"], self.config["questions_size"], questions, are_questions_numbered)
-        self.save_document(document_path, document_filename, document_number)
-
+        self.set_columns(self.config["word"]["columns_number"])
+        self.write_questions(self.config["word"]["font"], self.config["word"]["questions_size"], self.questions, self.config["are_questions_numbered"], self.config["word"]["images_size"])
+    
 
     def set_font(self, font: str) -> None:
         self.doc.styles['Normal'].font.name = font
@@ -67,14 +72,21 @@ class Word():
         self.doc.sections[1]._sectPr.xpath('./w:cols')[0].set(qn('w:num'), str(columns_number))
 
 
-    def add_question_header(self, font: str, question_size: int, question_header: str) -> None: 
-        header = self.doc.add_heading(question_header, 3) #???
+    def add_question_header(self, font: str, question_size: int, question_header: str, quesion_image: str, question_image_size: float) -> None: 
+        text_header = f"{question_header}\n" if quesion_image else f"{question_header}"
+        header = self.doc.add_heading(text_header, 3)
+        if quesion_image:
+            run_i = header.add_run()
+            run_i.add_picture(quesion_image, width=Inches(question_image_size))
+
         for run in header.runs:
             run.font.color.rgb = RGBColor(0, 0, 0)
             run.bold = True
             run.font.name = font
             run.font.size = Pt(question_size)
-        header.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+        
+        if not quesion_image:
+            header.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
 
 
     def add_question_option(self, option: dict) -> None:
@@ -86,11 +98,12 @@ class Word():
                 run.underline = option["correct"]
         
 
-    def write_questions(self, font: str, questions_size: int, questions: list, are_questions_numbered: bool) -> None:
+    def write_questions(self, font: str, questions_size: int, questions: list, are_questions_numbered: bool, question_image_size: float) -> None:
         for index, question in enumerate(questions):
             question_header = (f"{index + 1}) " if are_questions_numbered else "") + question['question']
+            question_image = question['image']
             
-            self.add_question_header(font, questions_size, question_header)
+            self.add_question_header(font, questions_size, question_header, question_image, question_image_size)
             for option in question['options']:
                 self.add_question_option(option)
 
