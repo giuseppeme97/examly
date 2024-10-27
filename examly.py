@@ -12,52 +12,58 @@ import subprocess
 class Examly():
     def __init__(self, config, console=None) -> None:
         self.config = config
-        if not console:
-            self.console = print
+        self.source_state = None
+        self.console = console if console else print
+        self.console("Istanza di Examly creata.")
 
 
-    def loaded_source(self) -> bool:
+    def load_source(self) -> None:
         self.source = Source(self.config)
         if self.source.load_source():
-            self.console("Sorgente caricata correttamente.")
+            
 
             questions_log = self.source.check_questions()
             if len(questions_log) > 0:
                 self.console("\nERRORE: Alcune domande presenti nella sorgente non sono complete.")
                 self.console("Indici domande:")
-                self.console(questions_log)
-                return False
+                self.console(" ".join(map(str, questions_log)))
+                self.source_loaded = False
             
             options_log = self.source.check_options_number()
             if len(options_log) > 0:
                 self.console("\nERRORE: Alcune domande presenti nella sorgente non hanno un numero idoneo di opzioni.")
                 self.console("Indici domande:")
-                self.console(options_log)
-                return False
+                self.console(" ".join(map(str, options_log)))
+                self.source_loaded = False
             
             orphans_log = self.source.check_orphan_questions()
             if len(orphans_log) > 0:
                 self.console("\nERRORE: Alcune domande presenti nella sorgente non hanno alcune categorie assegnate.")
                 self.console("Indici domande:")
-                self.console(orphans_log)
-                return False
+                self.console(" ".join(map(str, orphans_log)))
+                self.source_loaded = False
 
             solutions_log = self.source.check_solutions()
             if len(solutions_log) > 0:
                 self.console("\nATTENZIONE: Alcune domande presenti nella sorgente non hanno specificata l'opzione corretta.")
                 self.console("Indici domande:")
-                self.console(solutions_log)
+                self.console(" ".join(map(str, solutions_log)))
 
             images_log = self.source.check_images()
             if len(images_log["file_mancanti"]) > 0:
                 self.console("\nATTENZIONE: Alcune immagini presenti nella sorgente non sono state trovate.")
-                self.console("Indici domande:")
-                self.console(images_log["file_mancanti"])
+                self.console("Immagini non trovate:")
+                self.console(" ".join(map(str, images_log["file_mancanti"])))
             
-            return True
+            self.console("Sorgente caricata correttamente.")
+            self.source_loaded = True
         else:
             self.console("\nErrore nel caricamento della sorgente.")
-            return False
+            self.source_loaded = False
+
+    
+    def loaded_source(self) -> bool:
+        return self.source_state
         
 
     def get_subjects(self) -> list[str]:
@@ -78,10 +84,22 @@ class Examly():
 
     def get_rows(self) -> int:
         return self.source.get_rows()
+    
+
+    def set_source_file(self, source_file: str) -> None:
+        self.config["source_file"] = source_file
+
+
+    def set_documents_directory(self, documents_directory: str) -> None:
+        self.config["documents_directory"] = documents_directory
 
 
     def set_config(self, config: dict) -> None:
         self.config = config
+
+
+    def set_console(self, console: callable) -> None:
+        self.console = console
 
 
     def new_template(self) -> None:
@@ -125,13 +143,17 @@ class Examly():
                 
                 if self.config["are_documents_exported_to_pdf"]:
                     self.export_to_pdf(self.config["documents_directory"], solution_path)
+
+
+    def check_soffice(self):
+        pass
                     
             
     def export_to_pdf(self, destination_directory, file_path) -> None:
-        comando = [self.config["soffice_path"], "--headless", "--convert-to", "pdf", "--outdir", destination_directory, file_path]
+        command = [self.config["soffice_path"], "--headless", "--convert-to", "pdf", "--outdir", destination_directory, file_path]
         
         try:
-            subprocess.run(comando, check=True, capture_output=True, text=True)
+            subprocess.run(command, check=True, capture_output=True, text=True)
             self.console(f"Convertito {file_path} in PDF.")
 
         except subprocess.CalledProcessError:
@@ -149,14 +171,16 @@ class Examly():
 
 
     def run(self) -> None:
-        if self.loaded_source():
-            questions, _ = self.source.get_questions()
-            self.write_exams(questions)
-            if self.config["are_documents_included_to_zip"]: 
-                self.export_to_zip()
+        questions, _ = self.source.get_questions()
+        self.write_exams(questions)
+        if self.config["are_documents_included_to_zip"]: 
+            self.export_to_zip()
+            
 
 
 if __name__ == "__main__":
      examly = Examly(config=cf)
-     examly.run()
+     examly.load_source()
+     if examly.loaded_source():
+         examly.run()
         
