@@ -72,12 +72,41 @@ class Word():
         self.doc.sections[1]._sectPr.xpath('./w:cols')[0].set(qn('w:num'), str(columns_number))
 
 
-    def add_question_header(self, font: str, question_size: int, question_header: str, quesion_image: str, question_image_size: float) -> None: 
-        text_header = f"{question_header}\n" if quesion_image else f"{question_header}"
+    def add_image_shape(self, image: object) -> None:
+        # Accedi all'elemento XML dell'immagine
+        inline_shape = image._inline
+        # Ottieni l'elemento grafico dell'immagine
+        graphic = inline_shape.xpath('./a:graphic')[0]
+        graphic_data = graphic.xpath('./a:graphicData')[0]
+        pic = graphic_data.xpath('./pic:pic')[0]
+
+        # Accedi all'elemento "spPr" per modificare le proprietà di stile
+        spPr = pic.xpath('./pic:spPr')[0]
+        ln = OxmlElement('a:ln')
+        ln.set('w', '12700')  # Spessore del bordo (12700 EMU equivale a circa 1pt)
+        ln.set('cap', 'flat')
+
+        # Colore del bordo (es. grigio chiaro)
+        solid_fill = OxmlElement('a:solidFill')
+        srgb_clr = OxmlElement('a:srgbClr')
+        srgb_clr.set('val', '505050')  # Colore esadecimale grigio chiaro
+        solid_fill.append(srgb_clr)
+        ln.append(solid_fill)
+
+        # Aggiungi l'elemento "ln" al "spPr"
+        spPr.append(ln)
+
+
+    def add_question_header(self, font: str, question_size: int, question_header: str, question_image: str, question_image_size: float) -> None: 
+        text_header = f"{question_header}\n" if question_image else f"{question_header}"
         header = self.doc.add_heading(text_header, 3)
-        if quesion_image:
+        if question_image:
             run_i = header.add_run()
-            run_i.add_picture(quesion_image, width=Inches(question_image_size))
+            image = run_i.add_picture(question_image, width=Inches(question_image_size))
+            self.add_image_shape(image)
+
+        if not question_image:
+            header.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
 
         for run in header.runs:
             run.font.color.rgb = RGBColor(0, 0, 0)
@@ -85,9 +114,6 @@ class Word():
             run.font.name = font
             run.font.size = Pt(question_size)
         
-        if not quesion_image:
-            header.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
-
 
     def add_question_option(self, option: dict) -> None:
         paragraph = self.doc.add_paragraph(option['text'], style='List Bullet')
@@ -96,6 +122,8 @@ class Word():
             for run in paragraph.runs:
                 run.bold = option["correct"]
                 run.underline = option["correct"]
+                if option["correct"]:
+                    run.font.color.rgb = RGBColor(15, 150, 0)
         
 
     def write_questions(self, font: str, questions_size: int, questions: list, are_questions_numbered: bool, question_image_size: float) -> None:
@@ -108,8 +136,8 @@ class Word():
                 self.add_question_option(option)
 
                 
-    def save_document(self, document_path: str, document_filename: str, document_number: int) -> None: 
+    def save_document(self, documents_path: str, document_filename: str, document_number: int) -> None: 
         suffix = "_solutions" if self.is_document_solution else ""
-        self.doc.save(f"{document_path}/{document_filename}_{str(document_number)}{suffix}.docx")    
+        self.doc.save(f"{documents_path}/{document_filename}_{str(document_number)}{suffix}.docx")    
 
 

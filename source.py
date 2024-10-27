@@ -4,11 +4,10 @@ import pandas as pd
 class Source:
     def __init__(self, config) -> None:
         self.config = config
-        self.load_source()
         
 
     def load_source(self) -> bool:
-        _, ext = os.path.splitext(self.config["source_path"])
+        _, ext = os.path.splitext(self.config["source_file"])
 
         if ext in self.config["excel_formats_supported"]:
             reader = pd.read_excel
@@ -17,10 +16,9 @@ class Source:
             reader = pd.read_csv
             
         try:
-            self.df = reader(self.config["source_path"])
+            self.df = reader(self.config["source_file"])
             return True
         except:
-            print("Errore nel caricamento della risorsa.")
             return False
 
 
@@ -79,7 +77,7 @@ class Source:
 
     def check_image(self, row: object) -> str:
         if not pd.isna(row[self.config['image_denomination']]):
-            return f"{self.config['images_path']}/{str(row[self.config['image_denomination']])}"
+            return f"{self.config['images_directory']}/{str(row[self.config['image_denomination']])}"
         else:
             return None
 
@@ -103,7 +101,6 @@ class Source:
                     i = i + 1
                 
                 questions.append(question)
-        print(f"Filtrate {len(questions)} domande.")
         return questions
 
         

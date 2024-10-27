@@ -1,23 +1,27 @@
+import os
+import sys
+
 config = {
-    "source_path": "Domande.xlsx",
-    "document_path": "output",
-    "images_path": "images",
-    "template_path": "template",
+    "working_path": "/Users/giuseppe/Documents/examly",
+    "source_file": "Domande.xlsx",
+    "documents_directory": "output",
+    "images_directory": "images",
+    "template_directory": "template",
     "template_filename": "template.xlsx",
     "document_filename": "esame",
     "zip_filename": "compito",
     "subjects": ["INFORMATICA"],
-    "classrooms": [3],
+    "classrooms": [4],
     "periods": [],
     "sectors": ["TEORIA"],
     "document_title": "Compito di Informatica - A.S. 2024/2025 - Classe 4H",
     "document_header": "Cognome e Nome: ________________________________________________________",
     "documents_number": 1,
-    "questions_number": 5,
+    "questions_number": 100,
     "export_log": False,
     "are_pages_numbered": True,
     "are_documents_numbered": True,
-    "are_questions_numbered": False,
+    "are_questions_numbered": True,
     "are_questions_shuffled": True,
     "are_options_shuffled": True,
     "are_solutions_exported": True,
@@ -50,3 +54,17 @@ config = {
         "DSA": False
     }
 }
+
+def set_config():
+    if getattr(sys, 'frozen', False):
+        base_path = os.path.dirname(sys.executable)
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    config['source_file'] = f"{config['working_path']}/{config['source_file']}"
+    config['documents_directory'] = f"{config['working_path']}/{config['documents_directory']}"
+    config['images_directory'] = f"{config['working_path']}/{config['images_directory']}"
+    config['template_directory'] = f"{config['working_path']}/{config['template_directory']}"
+    print("***")
+
+set_config()

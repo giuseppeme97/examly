@@ -13,6 +13,7 @@ class Template:
             f"{self.config['sector_denomination']}", 
             f"{self.config['include_denomination']}", 
             f"{self.config['question_denomination']}", 
+            f"{self.config['images_denomination']}", 
             f"{self.config['solution_denomination']}", 
             f"{self.config['option_denomination']}_1",
             f"{self.config['option_denomination']}_2",
@@ -25,6 +26,6 @@ class Template:
 
 
     def save_tempale(self) -> None:
-        Path(self.config["template_path"]).mkdir(parents=True, exist_ok=True)
-        template_path = f"{self.config['template_path']}/{self.config['template_filename']}"                
+        Path(self.config["template_directory"]).mkdir(parents=True, exist_ok=True)
+        template_path = f"{self.config['template_directory']}/{self.config['template_filename']}"                
         self.workbook.save(template_path)

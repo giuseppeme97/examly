@@ -21,10 +21,16 @@ class Examly():
 
     def start(self) -> None:
         self.source = Source(self.config)
-        self.write_exams(self.source.get_questions())
-        if self.config["are_documents_included_to_zip"]: self.zip_exams()
+        if self.source.load_source():
+            print("Sorgente caricata correttamente.")
+            questions = self.source.get_questions()
+            print(f"Filtrate {len(questions)} domande.")
+            self.write_exams(questions)
+            if self.config["are_documents_included_to_zip"]: self.zip_exams()
+        else:
+            print("Errore nel caricamento della risorsa.")
 
-    
+
     def set_config(self, config: dict) -> None:
         self.config = config
 
@@ -35,15 +41,6 @@ class Examly():
         
 
     def get_config(self) -> dict:
-        if getattr(sys, 'frozen', False):
-            base_path = os.path.dirname(sys.executable)
-        else:
-            base_path = os.path.dirname(os.path.abspath(__file__))
-
-        config['source_path'] = f"{base_path}/{config['source_path']}"
-        config['document_path'] = f"{base_path}/{config['document_path']}"
-        config['images_path'] = f"{base_path}/{config['images_path']}"
-        config['template_path'] = f"{base_path}/{config['template_path']}"
         return config
 
 
@@ -65,11 +62,11 @@ class Examly():
 
     def write_exam(self, questions: list[dict], document_number: int, is_document_solution: bool) -> None:
         w = Word(self.config, questions, document_number, is_document_solution)
-        w.save_document(self.config["document_path"], self.config["document_filename"], document_number)
+        w.save_document(self.config["documents_directory"], self.config["document_filename"], document_number)
     
 
     def write_exams(self, filtered_questions: list[dict]) -> None:
-        Path(self.config["document_path"]).mkdir(parents=True, exist_ok=True)
+        Path(self.config["documents_directory"]).mkdir(parents=True, exist_ok=True)
         
         for document_number in range(1, self.config["documents_number"] + 1):
             sampled_questions = self.sample_questions(filtered_questions)
@@ -83,10 +80,10 @@ class Examly():
 
     def zip_exams(self) -> None:
         zip_filename = f"{self.config['zip_filename']}.zip"
-        with zipfile.ZipFile(f"{self.config['document_path']}/{zip_filename}", 'w') as zipf:
-            for file in os.listdir(self.config["document_path"]):
+        with zipfile.ZipFile(f"{self.config['documents_directory']}/{zip_filename}", 'w') as zipf:
+            for file in os.listdir(self.config["documents_directory"]):
                 if file.lower().endswith('.docx'):
-                    docx_file_path = os.path.join(self.config["document_path"], file)
+                    docx_file_path = os.path.join(self.config["documents_directory"], file)
                     zipf.write(docx_file_path, file)
                     os.remove(docx_file_path)
 
