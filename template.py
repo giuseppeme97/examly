@@ -25,7 +25,12 @@ class Template:
             self.workbook.active.cell(row=1, column=col_num, value=header).border = Border(bottom=Side(style='thin', color='000000'))
 
 
-    def save_tempale(self) -> None:
+    def save_tempale(self) -> bool:
         Path(self.config["template_directory"]).mkdir(parents=True, exist_ok=True)
-        template_path = f"{self.config['template_directory']}/{self.config['template_filename']}"                
-        self.workbook.save(template_path)
+        template_path = f"{self.config['template_directory']}/{self.config['template_filename']}" 
+        try:               
+            self.workbook.save(template_path)
+            return True
+        except:
+            return False
+        

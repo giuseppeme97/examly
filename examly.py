@@ -5,48 +5,91 @@ from pathlib import Path
 from word import Word
 from source import Source
 from template import Template
-import json
-import sys
-from config import config
+from config import config as cf
+import subprocess
 
 
 class Examly():
-    def __init__(self) -> None:
-        self.config = self.get_config()
+    def __init__(self, config, console=None) -> None:
+        self.config = config
+        if not console:
+            self.console = print
 
 
-    def show_menu(self) -> None:
-        pass
-
-
-    def start(self) -> None:
+    def loaded_source(self) -> bool:
         self.source = Source(self.config)
         if self.source.load_source():
-            print("Sorgente caricata correttamente.")
-            questions = self.source.get_questions()
-            print(f"Filtrate {len(questions)} domande.")
-            self.write_exams(questions)
-            if self.config["are_documents_included_to_zip"]: self.zip_exams()
+            self.console("Sorgente caricata correttamente.")
+
+            questions_log = self.source.check_questions()
+            if len(questions_log) > 0:
+                self.console("\nERRORE: Alcune domande presenti nella sorgente non sono complete.")
+                self.console("Indici domande:")
+                self.console(questions_log)
+                return False
+            
+            options_log = self.source.check_options_number()
+            if len(options_log) > 0:
+                self.console("\nERRORE: Alcune domande presenti nella sorgente non hanno un numero idoneo di opzioni.")
+                self.console("Indici domande:")
+                self.console(options_log)
+                return False
+            
+            orphans_log = self.source.check_orphan_questions()
+            if len(orphans_log) > 0:
+                self.console("\nERRORE: Alcune domande presenti nella sorgente non hanno alcune categorie assegnate.")
+                self.console("Indici domande:")
+                self.console(orphans_log)
+                return False
+
+            solutions_log = self.source.check_solutions()
+            if len(solutions_log) > 0:
+                self.console("\nATTENZIONE: Alcune domande presenti nella sorgente non hanno specificata l'opzione corretta.")
+                self.console("Indici domande:")
+                self.console(solutions_log)
+
+            images_log = self.source.check_images()
+            if len(images_log["file_mancanti"]) > 0:
+                self.console("\nATTENZIONE: Alcune immagini presenti nella sorgente non sono state trovate.")
+                self.console("Indici domande:")
+                self.console(images_log["file_mancanti"])
+            
+            return True
         else:
-            print("Errore nel caricamento della risorsa.")
+            self.console("\nErrore nel caricamento della sorgente.")
+            return False
+        
+
+    def get_subjects(self) -> list[str]:
+        return self.source.get_subjects()
+
+
+    def get_classrooms(self) -> list[int]:
+        return self.source.get_classrooms()
+    
+
+    def get_sectors(self) -> list[str]:
+        return self.source.get_sectors()
+    
+
+    def get_periods(self) -> list[str]:
+        return self.source.get_periods()
+
+
+    def get_rows(self) -> int:
+        return self.source.get_rows()
 
 
     def set_config(self, config: dict) -> None:
         self.config = config
 
 
-    def load_config(self, config_path) -> dict:
-        with open(config_path) as file:
-            return json.load(file)
-        
-
-    def get_config(self) -> dict:
-        return config
-
-
-    def save_template(self) -> None:
+    def new_template(self) -> None:
         t = Template(self.config)
-        t.save_tempale()
+        if t.save_tempale():
+            self.console("Nuovo template generato correttamente.")
+        else:
+            self.console("Errore nella generazione del template.")
         
 
     def sample_questions(self, questions: list[dict]) -> list[dict]:
@@ -60,9 +103,9 @@ class Examly():
         return questions[0: self.config['questions_number']]
     
 
-    def write_exam(self, questions: list[dict], document_number: int, is_document_solution: bool) -> None:
+    def write_exam(self, questions: list[dict], document_number: int, is_document_solution: bool) -> str:
         w = Word(self.config, questions, document_number, is_document_solution)
-        w.save_document(self.config["documents_directory"], self.config["document_filename"], document_number)
+        return w.save_document(self.config["documents_directory"], self.config["document_filename"], document_number)
     
 
     def write_exams(self, filtered_questions: list[dict]) -> None:
@@ -70,26 +113,50 @@ class Examly():
         
         for document_number in range(1, self.config["documents_number"] + 1):
             sampled_questions = self.sample_questions(filtered_questions)
-            self.write_exam(sampled_questions, document_number, is_document_solution=False)
+            document_path = self.write_exam(sampled_questions, document_number, is_document_solution=False)
+            self.console(f"\nGenerato {document_path} come esame.")
+
+            if self.config["are_documents_exported_to_pdf"]:
+                self.export_to_pdf(self.config["documents_directory"], document_path)
 
             if self.config["are_solutions_exported"]:
-                self.write_exam(sampled_questions, document_number, is_document_solution=True)
+                solution_path = self.write_exam(sampled_questions, document_number, is_document_solution=True)
+                self.console(f"Generato {solution_path} come esame.")
+                
+                if self.config["are_documents_exported_to_pdf"]:
+                    self.export_to_pdf(self.config["documents_directory"], solution_path)
+                    
             
-            print(f"Esame {document_number} generato!")
+    def export_to_pdf(self, destination_directory, file_path) -> None:
+        comando = [self.config["soffice_path"], "--headless", "--convert-to", "pdf", "--outdir", destination_directory, file_path]
+        
+        try:
+            subprocess.run(comando, check=True, capture_output=True, text=True)
+            self.console(f"Convertito {file_path} in PDF.")
+
+        except subprocess.CalledProcessError:
+            self.console(f"Errore nella conversione di {file_path}!")
 
 
-    def zip_exams(self) -> None:
+    def export_to_zip(self) -> None:
         zip_filename = f"{self.config['zip_filename']}.zip"
         with zipfile.ZipFile(f"{self.config['documents_directory']}/{zip_filename}", 'w') as zipf:
             for file in os.listdir(self.config["documents_directory"]):
-                if file.lower().endswith('.docx'):
-                    docx_file_path = os.path.join(self.config["documents_directory"], file)
-                    zipf.write(docx_file_path, file)
-                    os.remove(docx_file_path)
+                if file.lower().endswith('.docx') or file.lower().endswith('.pdf'):
+                    document_path = os.path.join(self.config["documents_directory"], file)
+                    zipf.write(document_path, file)    
+                    os.remove(document_path)
 
+
+    def run(self) -> None:
+        if self.loaded_source():
+            questions, _ = self.source.get_questions()
+            self.write_exams(questions)
+            if self.config["are_documents_included_to_zip"]: 
+                self.export_to_zip()
 
 
 if __name__ == "__main__":
-     e = Examly()
-     e.start()
+     examly = Examly(config=cf)
+     examly.run()
         

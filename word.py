@@ -136,8 +136,10 @@ class Word():
                 self.add_question_option(option)
 
                 
-    def save_document(self, documents_path: str, document_filename: str, document_number: int) -> None: 
+    def save_document(self, documents_path: str, document_filename: str, document_number: int) -> str: 
         suffix = "_solutions" if self.is_document_solution else ""
-        self.doc.save(f"{documents_path}/{document_filename}_{str(document_number)}{suffix}.docx")    
+        document_path = f"{documents_path}/{document_filename}_{str(document_number)}{suffix}.docx"
+        self.doc.save(document_path)
+        return document_path    
 
 

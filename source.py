@@ -28,37 +28,77 @@ class Source:
 
     def get_classrooms(self) -> list[int]:
         return sorted(list(map(int, pd.Series(self.df[self.config["classroom_denomination"]].unique()).dropna().tolist())))
+    
+
+    def get_sectors(self) -> list[str]:
+        return sorted(pd.Series(self.df[self.config["sector_denomination"]].unique()).dropna().tolist())
+    
+
+    def get_periods(self) -> list[str]:
+        return sorted(pd.Series(self.df[self.config["period_denomination"]].unique()).dropna().tolist())
 
 
     def get_rows(self) -> int:
         return self.df.shape[0]
-    
-
-    def check_all(self) -> bool:
-        return self.check_solution_option() and self.check_incomplete_questions() and self.check_options_number()
 
     
-    def check_solution_option(self) -> bool:
+    def check_solutions(self) -> list[int]:
         logs = []
         for i, row in self.df.iterrows():
             if pd.isna(row[self.config['solution_denomination']]):
-                logs.append(i)
+                logs.append(i + 2)
 
-        return len(logs) == 0 
+        return logs 
 
 
-    def check_incomplete_questions(self) -> bool:
+    def check_questions(self) -> list[int]:
         logs = []
         for i, row in self.df.iterrows():
             if pd.isna(row[self.config['question_denomination']]):
-                logs.append(i)
+                logs.append(i + 2)
                 
-        return len(logs) == 0 
+        return logs 
+    
+
+    def check_images(self) -> dict:
+        founded_images = []
+        missed_images = []
+
+        for _, row in self.df.iterrows():
+            if not pd.isna(row[self.config['image_denomination']]):
+                image_path = f"{self.config['images_directory']}/{str(row[self.config['image_denomination']])}"
+                if os.path.isfile(image_path):
+                    founded_images.append(image_path)
+                else:
+                    missed_images.append(image_path)
+        
+        return {
+            "file_esistenti": founded_images,
+            "file_mancanti": missed_images
+        }
         
 
+    def check_options_number(self) -> list[int]:
+        logs = []
+        for i, row in self.df.iterrows():
+            missed_options = 0
+            option_number = 1
+            while f'{self.config["option_denomination"]}_{option_number}' in row:
+                if pd.isna(row[f'{self.config["option_denomination"]}_{option_number}']):
+                    missed_options += 1
+                option_number = option_number + 1
+            option_number = option_number - 1
+            if option_number - missed_options == 1:
+                logs.append(i + 2)
+        return logs
+    
 
-    def check_options_number(self) -> bool:
-        return True
+    def check_orphan_questions(self) -> list[int]:
+        logs = []
+        for i, row in self.df.iterrows():
+            if pd.isna(row[self.config['subject_denomination']]) or pd.isna(row[self.config['classroom_denomination']]) or pd.isna(row[self.config['period_denomination']]) or pd.isna(row[self.config['sector_denomination']]):
+                logs.append(i + 2)
+        return logs 
     
 
     def check_row(self, row: object) -> bool:
@@ -75,21 +115,22 @@ class Source:
             return base
         
 
-    def check_image(self, row: object) -> str:
-        if not pd.isna(row[self.config['image_denomination']]):
-            return f"{self.config['images_directory']}/{str(row[self.config['image_denomination']])}"
+    def get_image_path(self, row: object) -> str:
+        image_path = f"{self.config['images_directory']}/{str(row[self.config['image_denomination']])}"
+        if not pd.isna(row[self.config['image_denomination']]) and os.path.isfile(image_path):
+            return image_path
         else:
             return None
 
 
-    def get_questions(self) -> list[dict]:
+    def get_questions(self) -> tuple[list[dict], int]:
         questions = []
         
         for _, row in self.df.iterrows():
             if (self.check_row(row)):
                 question = {
                     "question": str(row[self.config['question_denomination']]),
-                    "image": self.check_image(row),
+                    "image": self.get_image_path(row),
                     "options": []
                 }
                 
@@ -101,6 +142,6 @@ class Source:
                     i = i + 1
                 
                 questions.append(question)
-        return questions
+        return (questions, len(questions))
 
         
