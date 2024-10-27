@@ -3,7 +3,7 @@ config = {
     "soffice_path": "/Applications/LibreOffice.app/Contents/MacOS/soffice",
     "source_file": "/Users/giuseppe/Documents/examly/Domande.xlsx",
     "documents_directory": "/Users/giuseppe/Documents/examly/output",
-    "images_directory": "/Users/giuseppe/Documents/examly/images",
+    "images_directory": None,
     "template_directory": "/Users/giuseppe/Documents/examly/template",
     "template_filename": "template.xlsx",
     "document_filename": "esame",

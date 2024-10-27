@@ -13,19 +13,19 @@ class MyFrame(wx.Frame):
     def init_params(self):
         self.filters = {
             "subjects": {
-                "label": "Materie",
+                "label": "Materie:",
                 "items": []
             },
             "classrooms": {
-                "label": "Classi",
+                "label": "Classi:",
                 "items": []
             },
             "periods": {
-                "label": "Periodi",
+                "label": "Periodi:",
                 "items": []
             },
             "sectors": {
-                "label": "Settori",
+                "label": "Settori:",
                 "items": []
             },
         }
