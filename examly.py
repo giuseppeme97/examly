@@ -4,6 +4,7 @@ from word import Word
 from source import Source
 from template import Template
 from config import config as cf
+from configs import Configuration
 from utils import Utils
 
 
@@ -13,6 +14,8 @@ class Examly():
         self.source_loaded = None
         self.console = console if console else print
         self.console("Istanza di Examly creata.")
+        if not Utils.check_soffice(self.config["soffice_path"]):
+            self.console("Comando soffice non presente nell'ambiente di esecuzione.")
 
 
     def load_source(self) -> None:
@@ -134,14 +137,14 @@ class Examly():
             self.console(f"\nGenerato {document_path} come esame.")
 
             if session["config"]["are_documents_exported_to_pdf"]:
-                Utils.export_to_pdf(session["config"]["documents_directory"], document_path)
+                Utils.export_to_pdf(self.config["soffice_path"], session["config"]["documents_directory"], document_path)
 
             if session["config"]["are_solutions_exported"]:
                 solution_path = self.write_exam(document["sampled_questions"], document["document_number"], is_document_solution=True)
                 self.console(f"Generato {solution_path} come esame.")
                 
                 if session["config"]["are_documents_exported_to_pdf"]:
-                    Utils.export_to_pdf(session["config"]["documents_directory"], solution_path)
+                    Utils.export_to_pdf(self.config["soffice_path"], session["config"]["documents_directory"], solution_path)
     
 
     def write_exams(self) -> dict:
@@ -158,7 +161,8 @@ class Examly():
             documents_iterator = range(1, self.config["documents_number"] + 1)
         
         for document_number in documents_iterator:
-            sampled_questions = self.sample_questions(self.source.get_questions())
+            questions, _ = self.source.get_questions()
+            sampled_questions = self.sample_questions(questions)
             document = {
                 "sampled_questions": sampled_questions,
                 "document_number": document_number
@@ -182,13 +186,9 @@ class Examly():
             self.export_to_zip()
 
         if self.config["export_session"]:
-            Utils.save_json(session)
+            Utils.save_json(self.config['documents_directory'], session)
 
         return session
-
-
-    def check_soffice(self):
-        pass
                     
 
     def export_to_zip(self) -> None:

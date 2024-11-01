@@ -19,27 +19,39 @@ class Utils:
     
 
     @staticmethod
-    def save_json(self, session: dict) -> None:
+    def save_json(documents_directory, session: dict) -> None:
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open(f"{self.config['documents_directory']}/{now}.json", "w") as file:
+        with open(f"{documents_directory}/{now}.json", "w") as file:
             json.dump(session, file, indent=4)
 
 
     @staticmethod
-    def load_json(self, session_file) -> dict:
+    def load_json(session_file) -> dict:
         with open(session_file, "r") as file:
             return json.load(file)
         
 
     @staticmethod
-    def export_to_pdf(self, destination_directory, file_path) -> bool:
-        command = [self.config["soffice_path"], "--headless", "--convert-to", "pdf", "--outdir", destination_directory, file_path]
+    def check_soffice(soffice_path) -> bool:
+        command = [soffice_path, "--headless", "--convert-to", "pdf", "--outdir", ".", ".docx"]
         
         try:
             subprocess.run(command, check=True, capture_output=True, text=True)
             return True
 
-        except subprocess.CalledProcessError:
+        except:
+            return False
+        
+
+    @staticmethod
+    def export_to_pdf(soffice_path, destination_directory, file_path) -> bool:
+        command = [soffice_path, "--headless", "--convert-to", "pdf", "--outdir", destination_directory, file_path]
+        
+        try:
+            subprocess.run(command, check=True, capture_output=True, text=True)
+            return True
+
+        except:
             return False
         
 
@@ -52,6 +64,84 @@ class Utils:
                 zipf.write(document_path, file)    
                 os.remove(document_path)    
         return zip_path
+    
+
+    def get_params() -> tuple[dict]:
+        filters = {
+            "subjects": {
+                "label": "Materie:",
+                "items": []
+            },
+            "classrooms": {
+                "label": "Classi:",
+                "items": []
+            },
+            "periods": {
+                "label": "Periodi:",
+                "items": []
+            },
+            "sectors": {
+                "label": "Settori:",
+                "items": []
+            },
+        }
+
+        options = {
+            "are_pages_numbered": {
+                "label": "Pagine numerate",
+                "reference": None,
+                "default": None
+            },
+            "are_documents_numbered": {
+                "label": "Documenti numerati",
+                "reference": None,
+                "default": None
+            },
+            "are_questions_numbered": {
+                "label": "Domande numerate",
+                "reference": None,
+                "default": None
+            },
+            "are_questions_shuffled": {
+                "label": "Domande mescolate",
+                "reference": None,
+                "default": None
+            },
+            "are_options_shuffled": {
+                "label": "Opzioni mescolate",
+                "reference": None,
+                "default": None
+            },
+            "are_solutions_exported": {
+                "label": "Esporta correttori",
+                "reference": None,
+                "default": None
+            },
+            "are_questions_single_included": {
+                "label": "Inclusione singola",
+                "reference": None,
+                "default": None
+            },
+            "are_documents_exported_to_pdf": {
+                "label": "Esporta in PDF",
+                "reference": None,
+                "default": None
+            },
+            "are_documents_included_to_zip": {
+                "label": "Includi in ZIP",
+                "reference": None,
+                "default": None
+            },
+            "export_session": {
+                "label": "Esporta sessione",
+                "reference": None,
+                "default": None
+            }
+        }
+
+        return filters, options
+
+
     
 
     

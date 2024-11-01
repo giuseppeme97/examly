@@ -13,7 +13,7 @@ class Template:
             f"{self.config['sector_denomination']}", 
             f"{self.config['include_denomination']}", 
             f"{self.config['question_denomination']}", 
-            f"{self.config['images_denomination']}", 
+            f"{self.config['image_denomination']}", 
             f"{self.config['solution_denomination']}", 
             f"{self.config['option_denomination']}_1",
             f"{self.config['option_denomination']}_2",
