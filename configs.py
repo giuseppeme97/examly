@@ -7,7 +7,7 @@ class Configuration:
     source_file = "/Users/giuseppe/Documents/examly/Domande.xlsx"
     session_file = "/Users/giuseppe/Documents/examly/sessione.json"
     documents_directory = "/Users/giuseppe/Documents/examly/output"
-    images_directory = "/Users/giuseppe/Documents/examly/imdages"
+    images_directory = "/Users/giuseppe/Documents/examly/images"
     template_directory = "/Users/giuseppe/Documents/examly/template"
     template_filename = "template.xlsx"
     document_filename = "esame"
@@ -18,9 +18,9 @@ class Configuration:
     sectors = []
     document_title = "Compito di Informatica - A.S. 2024/2025 - Classe 4H"
     document_header = "Cognome e Nome: ________________________________________________________"
-    documents_number = 5
+    documents_number = 2
     questions_number = 23
-    from_session = True
+    from_session = False
     are_pages_numbered = True
     are_documents_numbered = True
     are_questions_numbered = True
@@ -146,6 +146,7 @@ class Configuration:
     
     @classmethod
     def set_subjects(cls, value):
+        print(value)
         cls.subjects = value
 
     @classmethod
@@ -154,7 +155,7 @@ class Configuration:
 
     @classmethod
     def set_classrooms(cls, value):
-        cls.classrooms = value
+        cls.classrooms = [int(classroom) for classroom in value]
 
     @classmethod
     def get_classrooms(cls):
@@ -162,7 +163,7 @@ class Configuration:
 
     @classmethod
     def set_periods(cls, value):
-        cls.periods = value
+        cls.periods = [int(period) for period in value]
 
     @classmethod
     def get_periods(cls):
@@ -170,6 +171,7 @@ class Configuration:
 
     @classmethod
     def set_sectors(cls, value):
+        print(value)
         cls.sectors = value
 
     @classmethod
@@ -326,7 +328,7 @@ class Configuration:
 
     @classmethod
     def get_subject_denomination(cls):
-        return cls.subject_denom
+        return cls.subject_denomination
     
     @classmethod
     def set_classroom_denomination(cls, value):
@@ -488,6 +490,83 @@ class Configuration:
     @classmethod
     def get_DSA(cls):
         return cls.DSA
+    
+    @classmethod
+    def get_void_configs(cls):
+        filters = {
+            "subjects": {
+                "label": "Materie:",
+                "items": []
+            },
+            "classrooms": {
+                "label": "Classi:",
+                "items": []
+            },
+            "periods": {
+                "label": "Periodi:",
+                "items": []
+            },
+            "sectors": {
+                "label": "Settori:",
+                "items": []
+            },
+        }
+
+        options = {
+            Configuration.get_are_pages_numbered.__name__.removeprefix("get_"): {
+                "label": "Pagine numerate",
+                "reference": None,
+                "default": Configuration.get_are_pages_numbered()
+            },
+            Configuration.get_are_documents_numbered.__name__.removeprefix("get_"): {
+                "label": "Documenti numerati",
+                "reference": None,
+                "default": Configuration.get_are_documents_numbered()
+            },
+            Configuration.get_are_questions_numbered.__name__.removeprefix("get_"): {
+                "label": "Domande numerate",
+                "reference": None,
+                "default": Configuration.get_are_questions_numbered()
+            },
+            Configuration.get_are_questions_shuffled.__name__.removeprefix("get_"): {
+                "label": "Domande mescolate",
+                "reference": None,
+                "default": Configuration.get_are_questions_shuffled()
+            },
+            Configuration.get_are_options_shuffled.__name__.removeprefix("get_"): {
+                "label": "Opzioni mescolate",
+                "reference": None,
+                "default": Configuration.get_are_options_shuffled()
+            },
+            Configuration.get_are_solutions_exported.__name__.removeprefix("get_"): {
+                "label": "Esporta correttori",
+                "reference": None,
+                "default": Configuration.get_are_solutions_exported()
+            },
+            Configuration.get_are_questions_single_included.__name__.removeprefix("get_"): {
+                "label": "Inclusione singola",
+                "reference": None,
+                "default": Configuration.get_are_questions_single_included()
+            },
+            Configuration.get_are_documents_exported_to_pdf.__name__.removeprefix("get_"): {
+                "label": "Esporta in PDF",
+                "reference": None,
+                "default": Configuration.get_are_documents_exported_to_pdf()
+            },
+            Configuration.get_are_documents_included_to_zip.__name__.removeprefix("get_"): {
+                "label": "Includi in ZIP",
+                "reference": None,
+                "default": Configuration.get_are_documents_included_to_zip()
+            },
+            Configuration.get_export_session.__name__.removeprefix("get_"): {
+                "label": "Esporta sessione",
+                "reference": None,
+                "default": Configuration.get_export_session()
+            }
+        }
+
+        return filters, options
+
     
     @classmethod
     def export_config(cls, file_path):
