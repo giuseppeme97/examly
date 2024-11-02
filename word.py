@@ -119,8 +119,10 @@ class Word():
     def add_question_option(self, option: dict) -> None:
         paragraph = self.doc.add_paragraph(option['text'], style='List Bullet')
         paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
-        if self.is_solution:
-            for run in paragraph.runs:
+        
+        for run in paragraph.runs:
+            # run.font.size = 18  #TODO
+            if self.is_solution:
                 run.bold = option["correct"]
                 run.underline = option["correct"]
                 if option["correct"]:
