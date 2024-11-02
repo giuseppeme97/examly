@@ -8,9 +8,10 @@ from utils import Utils
 
 
 class Examly():
-    def __init__(self, console=None) -> None:
-        self.source_validated = None
-        self.console = console if console else print
+    def __init__(self, console: callable = None) -> None:
+        self.source_validated: bool = None
+        self.console: callable = console if console else print
+
         self.console("Istanza di Examly creata.")
         if not Utils.check_soffice(Configuration.get_soffice_path()):
             self.console(
@@ -19,7 +20,6 @@ class Examly():
     def load_source(self) -> None:
         self.source = Source()
         if self.source.is_loaded():
-
             questions_log = self.source.check_questions()
             if len(questions_log) > 0:
                 self.console(
@@ -116,9 +116,11 @@ class Examly():
         word = Word(questions, document_number, is_solution)
         return word.save()
 
-    def write_exams(self) -> dict:
+    def write_exams(self) -> None:
         Path(Configuration.get_documents_directory()).mkdir(
             parents=True, exist_ok=True)
+        
+        self.console("Genero documenti...")
 
         if Utils.is_integer(Configuration.get_exact_document_number()):
             documents_iterator = range(Configuration.get_exact_document_number(
@@ -132,23 +134,23 @@ class Examly():
             sampled_questions = self.sample_questions(questions)
             document_path = self.write_exam(
                 sampled_questions, document_number, is_solution=False)
-            self.console(f"\nGenerato {document_path} come esame.")
 
             if Configuration.get_are_documents_exported_to_pdf():
                 Utils.export_to_pdf(
-                    Configuration.get_documents_directory(), document_path)
+                    Configuration.get_soffice_path(), Configuration.get_documents_directory(), document_path)
 
             if Configuration.get_are_solutions_exported():
                 solution_path = self.write_exam(
                     sampled_questions, document_number, is_solution=True)
-                self.console(f"Generato {solution_path} come esame.")
 
                 if Configuration.get_are_documents_exported_to_pdf():
                     Utils.export_to_pdf(
-                        Configuration.get_documents_directory(), solution_path)
+                        Configuration.get_soffice_path(), Configuration.get_documents_directory(), solution_path)
 
         if Configuration.get_are_documents_included_to_zip():
             self.export_to_zip()
+
+        self.console("Documenti generati correttamente!")
 
     def export_to_zip(self) -> None:
         zip_filename = f"{Configuration.get_zip_filename()}.zip"
@@ -159,6 +161,6 @@ class Examly():
 if __name__ == "__main__":
     examly = Examly()
     examly.load_source()
-    
+
     if examly.is_source_validated():
         examly.write_exams()

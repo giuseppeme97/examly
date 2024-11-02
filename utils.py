@@ -60,9 +60,10 @@ class Utils:
         zip_path = f"{documents_directory}/{zip_filename}"
         with zipfile.ZipFile(zip_path, 'w') as zipf:
             for file in os.listdir(documents_directory):
-                document_path = os.path.join(documents_directory, file)
-                zipf.write(document_path, file)    
-                os.remove(document_path)    
+                if file.endswith('.docx'):
+                    document_path = os.path.join(documents_directory, file)
+                    zipf.write(document_path, file)    
+                    os.remove(document_path)    
         return zip_path
     
 

@@ -29,7 +29,7 @@ class Configuration:
     are_solutions_exported = True
     are_questions_single_included = True
     are_documents_exported_to_pdf = False
-    are_documents_included_to_zip = False
+    are_documents_included_to_zip = True
     export_session = False
     exact_document_number = None
     excel_formats_supported = [".xlsx", ".xls"]
@@ -146,7 +146,6 @@ class Configuration:
     
     @classmethod
     def set_subjects(cls, value):
-        print(value)
         cls.subjects = value
 
     @classmethod
@@ -171,7 +170,6 @@ class Configuration:
 
     @classmethod
     def set_sectors(cls, value):
-        print(value)
         cls.sectors = value
 
     @classmethod
@@ -482,17 +480,9 @@ class Configuration:
     @classmethod
     def get_right_margin(cls):
         return cls.right_margin
-
-    @classmethod
-    def set_DSA(cls, value):
-        cls.DSA = value
-
-    @classmethod
-    def get_DSA(cls):
-        return cls.DSA
     
     @classmethod
-    def get_void_configs(cls):
+    def get_configs(cls):
         filters = {
             "subjects": {
                 "label": "Materie:",
@@ -512,29 +502,29 @@ class Configuration:
             },
         }
 
-        options = {
+        control_options = {
             Configuration.get_are_pages_numbered.__name__.removeprefix("get_"): {
-                "label": "Pagine numerate",
+                "label": "Inserisci numero di pagina",
                 "reference": None,
                 "default": Configuration.get_are_pages_numbered()
             },
             Configuration.get_are_documents_numbered.__name__.removeprefix("get_"): {
-                "label": "Documenti numerati",
+                "label": "Numera documenti",
                 "reference": None,
                 "default": Configuration.get_are_documents_numbered()
             },
             Configuration.get_are_questions_numbered.__name__.removeprefix("get_"): {
-                "label": "Domande numerate",
+                "label": "Numera domande",
                 "reference": None,
                 "default": Configuration.get_are_questions_numbered()
             },
             Configuration.get_are_questions_shuffled.__name__.removeprefix("get_"): {
-                "label": "Domande mescolate",
+                "label": "Mescola domande",
                 "reference": None,
                 "default": Configuration.get_are_questions_shuffled()
             },
             Configuration.get_are_options_shuffled.__name__.removeprefix("get_"): {
-                "label": "Opzioni mescolate",
+                "label": "Mescola risposte",
                 "reference": None,
                 "default": Configuration.get_are_options_shuffled()
             },
@@ -544,7 +534,7 @@ class Configuration:
                 "default": Configuration.get_are_solutions_exported()
             },
             Configuration.get_are_questions_single_included.__name__.removeprefix("get_"): {
-                "label": "Inclusione singola",
+                "label": "Includi domande singolarmente",
                 "reference": None,
                 "default": Configuration.get_are_questions_single_included()
             },
@@ -554,18 +544,18 @@ class Configuration:
                 "default": Configuration.get_are_documents_exported_to_pdf()
             },
             Configuration.get_are_documents_included_to_zip.__name__.removeprefix("get_"): {
-                "label": "Includi in ZIP",
+                "label": "Esporta in ZIP (beta)",
                 "reference": None,
                 "default": Configuration.get_are_documents_included_to_zip()
             },
             Configuration.get_export_session.__name__.removeprefix("get_"): {
-                "label": "Esporta sessione",
+                "label": "Esporta sessione (non implementata)",
                 "reference": None,
                 "default": Configuration.get_export_session()
             }
         }
 
-        return filters, options
+        return filters, control_options
 
     
     @classmethod
