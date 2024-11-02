@@ -3,6 +3,8 @@ import json
 import subprocess
 import zipfile
 import os
+import wx
+
 
 class Utils:
     @staticmethod
@@ -16,7 +18,6 @@ class Utils:
             except ValueError:
                 return False
         return False
-    
 
     @staticmethod
     def save_json(documents_directory, session: dict) -> None:
@@ -24,36 +25,34 @@ class Utils:
         with open(f"{documents_directory}/{now}.json", "w") as file:
             json.dump(session, file, indent=4)
 
-
     @staticmethod
     def load_json(session_file) -> dict:
         with open(session_file, "r") as file:
             return json.load(file)
-        
 
     @staticmethod
     def check_soffice(soffice_path) -> bool:
-        command = [soffice_path, "--headless", "--convert-to", "pdf", "--outdir", ".", ".docx"]
-        
+        command = [soffice_path, "--headless",
+                   "--convert-to", "pdf", "--outdir", ".", ".docx"]
+
         try:
             subprocess.run(command, check=True, capture_output=True, text=True)
             return True
 
         except:
             return False
-        
 
     @staticmethod
     def export_to_pdf(soffice_path, destination_directory, file_path) -> bool:
-        command = [soffice_path, "--headless", "--convert-to", "pdf", "--outdir", destination_directory, file_path]
-        
+        command = [soffice_path, "--headless", "--convert-to",
+                   "pdf", "--outdir", destination_directory, file_path]
+
         try:
             subprocess.run(command, check=True, capture_output=True, text=True)
             return True
 
         except:
             return False
-        
 
     @staticmethod
     def directory_to_zip(documents_directory, zip_filename) -> str:
@@ -62,87 +61,13 @@ class Utils:
             for file in os.listdir(documents_directory):
                 if file.endswith('.docx'):
                     document_path = os.path.join(documents_directory, file)
-                    zipf.write(document_path, file)    
-                    os.remove(document_path)    
+                    zipf.write(document_path, file)
+                    os.remove(document_path)
         return zip_path
-    
 
-    def get_params() -> tuple[dict]:
-        filters = {
-            "subjects": {
-                "label": "Materie:",
-                "items": []
-            },
-            "classrooms": {
-                "label": "Classi:",
-                "items": []
-            },
-            "periods": {
-                "label": "Periodi:",
-                "items": []
-            },
-            "sectors": {
-                "label": "Settori:",
-                "items": []
-            },
-        }
-
-        options = {
-            "are_pages_numbered": {
-                "label": "Pagine numerate",
-                "reference": None,
-                "default": None
-            },
-            "are_documents_numbered": {
-                "label": "Documenti numerati",
-                "reference": None,
-                "default": None
-            },
-            "are_questions_numbered": {
-                "label": "Domande numerate",
-                "reference": None,
-                "default": None
-            },
-            "are_questions_shuffled": {
-                "label": "Domande mescolate",
-                "reference": None,
-                "default": None
-            },
-            "are_options_shuffled": {
-                "label": "Opzioni mescolate",
-                "reference": None,
-                "default": None
-            },
-            "are_solutions_exported": {
-                "label": "Esporta correttori",
-                "reference": None,
-                "default": None
-            },
-            "are_questions_single_included": {
-                "label": "Inclusione singola",
-                "reference": None,
-                "default": None
-            },
-            "are_documents_exported_to_pdf": {
-                "label": "Esporta in PDF",
-                "reference": None,
-                "default": None
-            },
-            "are_documents_included_to_zip": {
-                "label": "Includi in ZIP",
-                "reference": None,
-                "default": None
-            },
-            "export_session": {
-                "label": "Esporta sessione",
-                "reference": None,
-                "default": None
-            }
-        }
-
-        return filters, options
-
-
-    
-
-    
+    @staticmethod
+    def only_integer(event):
+        key_code = event.GetKeyCode()
+        if not (ord('0') <= key_code <= ord('9')) and key_code != wx.WXK_BACK:
+            return
+        event.Skip()

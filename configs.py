@@ -4,7 +4,7 @@ class Configuration:
     app_name = "Examly"
     working_path = "/Users/giuseppe/Documents/examly"
     soffice_path = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
-    source_file = "/Users/giuseppe/Documents/examly/Domande.xlsx"
+    source_file = "/Users/giuseppe/Documents/examly/FALCO.xlsx"
     session_file = "/Users/giuseppe/Documents/examly/sessione.json"
     documents_directory = "/Users/giuseppe/Documents/examly/output"
     images_directory = "/Users/giuseppe/Documents/examly/images"
@@ -16,20 +16,20 @@ class Configuration:
     classrooms = []
     periods = []
     sectors = []
-    document_title = "Compito di Informatica - A.S. 2024/2025 - Classe 4H"
+    document_title = "Prova comune di Informatica - A.S. 2024/2025 - Classi 3F 3G 3H 3I"
     document_header = "Cognome e Nome: ________________________________________________________"
-    documents_number = 2
-    questions_number = 23
+    documents_number = 25
+    questions_number = 40
     from_session = False
     are_pages_numbered = True
     are_documents_numbered = True
     are_questions_numbered = True
     are_questions_shuffled = True
     are_options_shuffled = True
-    are_solutions_exported = True
-    are_questions_single_included = True
-    are_documents_exported_to_pdf = False
-    are_documents_included_to_zip = True
+    are_solutions_exported = False
+    are_questions_single_included = False
+    are_documents_exported_to_pdf = True
+    are_documents_included_to_zip = False
     export_session = False
     exact_document_number = None
     excel_formats_supported = [".xlsx", ".xls"]
@@ -555,9 +555,12 @@ class Configuration:
             }
         }
 
-        return filters, control_options
 
-    
+
+        fonts = [Configuration.get_font(), "Arial", "Courier", "Times New Roman"]
+        languages = [Configuration.get_language(), "en-EN"]
+        return filters, control_options, fonts, languages
+
     @classmethod
     def export_config(cls, file_path):
         attributi = {k: v for k, v in cls.__dict__.items() if not k.startswith("__") and not callable(v)}

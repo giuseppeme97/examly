@@ -3,11 +3,12 @@ from threading import Thread
 from examly import Examly
 from configs import Configuration
 from datetime import datetime
+from utils import Utils
 
 
-class Worker(Thread):
+class ExamlyWorker(Thread):
     def __init__(self, functor, callback):
-        super(Worker, self).__init__()
+        super(ExamlyWorker, self).__init__()
         self.functor = functor
         self.callback = callback
 
@@ -16,65 +17,87 @@ class Worker(Thread):
         wx.CallAfter(self.callback, 0)
 
 
-class OptionsWindow(wx.Dialog):
+class StyleOptionsWindow(wx.Dialog):
     def __init__(self, parent, title):
-        super(OptionsWindow, self).__init__(
+        super(StyleOptionsWindow, self).__init__(
             parent, title=title)
+        
+        _, _, fonts, languages = Configuration.get_configs()
 
         panel = wx.Panel(self)
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        grid_sizer = wx.GridSizer(rows=9, cols=2, vgap=10, hgap=10)
+        grid_sizer = wx.GridSizer(cols=2, vgap=10, hgap=10)
 
         # Selection per "font"
         grid_sizer.Add(wx.StaticText(panel, label="Font:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.font_selection = wx.Choice(panel, choices=["Arial", "Courier", "Times New Roman"])
+        self.font_selection = wx.Choice(panel, choices=fonts)
+        self.font_selection.SetSelection(0)
         grid_sizer.Add(self.font_selection, 1, wx.EXPAND)
 
         # Selection per "linguaggio"
         grid_sizer.Add(wx.StaticText(panel, label="Linguaggio:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.language_selection = wx.Choice(panel, choices=["Python", "Java", "C++"])
+        self.language_selection = wx.Choice(panel, choices=languages)
+        self.language_selection.SetSelection(0)
         grid_sizer.Add(self.language_selection, 1, wx.EXPAND)
 
         # Text control per "dimensione titolo"
         grid_sizer.Add(wx.StaticText(panel, label="Dimensione titolo:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.title_size = wx.TextCtrl(panel)
-        grid_sizer.Add(self.title_size, 1, wx.EXPAND)
+        self.title_size_input = wx.TextCtrl(panel, value=str(Configuration.get_title_size()))
+        self.title_size_input.SetHint(str(Configuration.get_title_size()))
+        self.title_size_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        grid_sizer.Add(self.title_size_input, 1, wx.EXPAND)
 
         # Text control per "dimensione domande"
         grid_sizer.Add(wx.StaticText(panel, label="Dimensione domande:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.question_size = wx.TextCtrl(panel)
-        grid_sizer.Add(self.question_size, 1, wx.EXPAND)
+        self.question_size_input = wx.TextCtrl(panel, value=str(Configuration.get_questions_size()))
+        self.question_size_input.SetHint(str(Configuration.get_questions_size()))
+        self.question_size_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        grid_sizer.Add(self.question_size_input, 1, wx.EXPAND)
 
         # Text control per "dimensione immagini"
         grid_sizer.Add(wx.StaticText(panel, label="Dimensione immagini:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.image_size = wx.TextCtrl(panel)
-        grid_sizer.Add(self.image_size, 1, wx.EXPAND)
+        self.image_size_input = wx.TextCtrl(panel, value=str(Configuration.get_images_size()))
+        self.image_size_input.SetHint(str(Configuration.get_images_size()))
+        self.image_size_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        grid_sizer.Add(self.image_size_input, 1, wx.EXPAND)
 
         # Text control per "Distanza fra domande"
         grid_sizer.Add(wx.StaticText(panel, label="Distanza fra domande:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.distance_between_questions = wx.TextCtrl(panel)
-        grid_sizer.Add(self.distance_between_questions, 1, wx.EXPAND)
+        self.questions_distance_input = wx.TextCtrl(panel, value=str(Configuration.get_questions_distance()))
+        self.questions_distance_input.SetHint(str(Configuration.get_questions_distance()))
+        self.questions_distance_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        grid_sizer.Add(self.questions_distance_input, 1, wx.EXPAND)
 
         # Text control per "Numero di colonne della sezione"
         grid_sizer.Add(wx.StaticText(panel, label="Numero di colonne della sezione:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.column_number = wx.TextCtrl(panel)
-        grid_sizer.Add(self.column_number, 1, wx.EXPAND)
+        self.column_number_input = wx.TextCtrl(panel, value=str(Configuration.get_columns_number()))
+        self.column_number_input.SetHint(str(Configuration.get_columns_number()))
+        self.column_number_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        grid_sizer.Add(self.column_number_input, 1, wx.EXPAND)
 
         # Text control per "Dimensione margine sinistro"
         grid_sizer.Add(wx.StaticText(panel, label="Dimensione margine sinistro:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.left_margin_size = wx.TextCtrl(panel)
-        grid_sizer.Add(self.left_margin_size, 1, wx.EXPAND)
+        self.left_margin_input = wx.TextCtrl(panel, value=str(Configuration.get_left_margin()))
+        self.left_margin_input.SetHint(str(Configuration.get_left_margin()))
+        self.left_margin_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        grid_sizer.Add(self.left_margin_input, 1, wx.EXPAND)
+
+        # Text control per "Dimensione margine destro"
+        grid_sizer.Add(wx.StaticText(panel, label="Dimensione margine destro:"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self.right_margin_input = wx.TextCtrl(panel, value=str(Configuration.get_right_margin()))
+        self.right_margin_input.SetHint(str(Configuration.get_right_margin()))
+        self.right_margin_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        grid_sizer.Add(self.right_margin_input, 1, wx.EXPAND)
 
         # Aggiunta pulsanti OK e Annulla
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         ok_button = wx.Button(panel, wx.ID_OK, label="OK")
         cancel_button = wx.Button(panel, wx.ID_CANCEL, label="Annulla")
         button_sizer.Add(ok_button, 0, wx.ALL, 5)
-        button_sizer.Add(cancel_button, 0, wx.ALL, 5)
+        button_sizer.Add(cancel_button, 0, wx.ALL | wx.CENTER, 5)
 
         # Aggiungiamo il pulsante alla griglia
-        grid_sizer.Add(button_sizer, 0, wx.ALIGN_CENTER, 2)
-
+        grid_sizer.Add(button_sizer, 1, wx.EXPAND)
         main_sizer.Add(grid_sizer, 1, wx.EXPAND | wx.ALL, 15)
         panel.SetSizer(main_sizer)
         main_sizer.Fit(panel)
@@ -90,7 +113,7 @@ class MainWindow(wx.Frame):
         self.examly = Examly(console=self.printer)
 
     def init_params(self):
-        self.filters, self.control_options = Configuration.get_configs()
+        self.filters, self.control_options, _, _ = Configuration.get_configs()
 
     def init_ui(self):
         # Pannello principale
@@ -145,75 +168,48 @@ class MainWindow(wx.Frame):
         self.left_sizer.Add(template_sizer, 0, wx.EXPAND)
 
         # Inserimento document_filename
-        self.document_filename_label = wx.StaticText(
-            self.panel, label="Prefisso documenti:")
-        self.document_filename_input = wx.TextCtrl(
-            self.panel, value=Configuration.get_document_filename())
-        self.document_filename_input.SetHint(
-            Configuration.get_document_filename())
-        self.left_sizer.Add(self.document_filename_label,
-                            0, wx.ALL | wx.EXPAND, 5)
-        self.left_sizer.Add(self.document_filename_input,
-                            0, wx.ALL | wx.EXPAND, 5)
+        self.document_filename_input = wx.TextCtrl(self.panel, value=Configuration.get_document_filename())
+        self.document_filename_input.SetHint(Configuration.get_document_filename())
+        self.left_sizer.Add(wx.StaticText(self.panel, label="Prefisso dei documenti:"), 0, wx.ALL | wx.EXPAND, 5)
+        self.left_sizer.Add(self.document_filename_input, 0, wx.ALL | wx.EXPAND, 5)
 
         # Inserimento document_title
-        self.document_title_label = wx.StaticText(
-            self.panel, label="Titolo documenti:")
-        self.document_title_input = wx.TextCtrl(
-            self.panel, value=Configuration.get_document_title())
+        self.document_title_input = wx.TextCtrl(self.panel, value=Configuration.get_document_title())
         self.document_title_input.SetHint(Configuration.get_document_title())
-        self.left_sizer.Add(self.document_title_label,
-                            0, wx.ALL | wx.EXPAND, 5)
-        self.left_sizer.Add(self.document_title_input,
-                            0, wx.ALL | wx.EXPAND, 5)
+        self.left_sizer.Add(wx.StaticText(self.panel, label="Titolo dei documenti:"), 0, wx.ALL | wx.EXPAND, 5)
+        self.left_sizer.Add(self.document_title_input, 0, wx.ALL | wx.EXPAND, 5)
 
         # Inserimento zip_filename
-        self.zip_filename_label = wx.StaticText(
-            self.panel, label="Nome file zip:")
-        self.zip_filename_input = wx.TextCtrl(
-            self.panel, value=Configuration.get_zip_filename())
+        self.zip_filename_input = wx.TextCtrl(self.panel, value=Configuration.get_zip_filename())
         self.zip_filename_input.SetHint(Configuration.get_zip_filename())
-        self.left_sizer.Add(self.zip_filename_label, 0, wx.ALL | wx.EXPAND, 5)
+        self.left_sizer.Add(wx.StaticText(self.panel, label="Nome file ZIP:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.zip_filename_input, 0, wx.ALL | wx.EXPAND, 5)
 
         # Inserimento documents_number
-        self.documents_number_label = wx.StaticText(
-            self.panel, label="Numero di documenti:")
-        self.documents_number_input = wx.TextCtrl(
-            self.panel, style=wx.TE_PROCESS_ENTER, value=str(Configuration.get_documents_number()))
-        self.documents_number_input.Bind(wx.EVT_CHAR, self.only_integer)
-        self.left_sizer.Add(self.documents_number_label,
-                            0, wx.ALL | wx.EXPAND, 5)
-        self.left_sizer.Add(self.documents_number_input,
-                            0, wx.ALL | wx.EXPAND, 5)
+        self.documents_number_input = wx.TextCtrl(self.panel, style=wx.TE_PROCESS_ENTER, value=str(Configuration.get_documents_number()))
+        self.documents_number_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        self.left_sizer.Add(wx.StaticText(self.panel, label="Numero di documenti:"), 0, wx.ALL | wx.EXPAND, 5)
+        self.left_sizer.Add(self.documents_number_input, 0, wx.ALL | wx.EXPAND, 5)
 
         # Inserimento questions_number
-        self.questions_number_label = wx.StaticText(
-            self.panel, label="Numero di domande:")
-        self.questions_number_input = wx.TextCtrl(
-            self.panel, style=wx.TE_PROCESS_ENTER, value=str(Configuration.get_questions_number()))
-        self.questions_number_input.Bind(wx.EVT_CHAR, self.only_integer)
-        self.left_sizer.Add(self.questions_number_label,
-                            0, wx.ALL | wx.EXPAND, 5)
-        self.left_sizer.Add(self.questions_number_input,
-                            0, wx.ALL | wx.EXPAND, 5)
+        self.questions_number_input = wx.TextCtrl(self.panel, style=wx.TE_PROCESS_ENTER, value=str(Configuration.get_questions_number()))
+        self.questions_number_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        self.left_sizer.Add(wx.StaticText(self.panel, label="Numero di domande per documento:"), 0, wx.ALL | wx.EXPAND, 5)
+        self.left_sizer.Add(self.questions_number_input, 0, wx.ALL | wx.EXPAND, 5)
 
         # Checkbok filtri
         self.global_filters_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.left_sizer.Add(self.global_filters_sizer,
-                            0, wx.ALL | wx.EXPAND, 5)
+        self.left_sizer.Add(self.global_filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
 
         self.content_sizer.Add(self.left_sizer, 1, wx.ALL | wx.EXPAND, 10)
         self.right_sizer = wx.BoxSizer(wx.VERTICAL)
         self.right_sizer.AddStretchSpacer()
 
         # Checkbox opzioni
-        self.control_options_label = wx.StaticText(
-            self.panel, label="Opzioni di controllo:")
-        self.right_sizer.Add(self.control_options_label, 0, wx.ALL | wx.EXPAND, 5)
+        self.right_sizer.Add(wx.StaticText(self.panel, label="Opzioni di controllo:"), 0, wx.ALL | wx.EXPAND, 5)
+        
         for _, option in self.control_options.items():
-            option["reference"] = wx.CheckBox(
-                self.panel, label=f"{option['label']}")
+            option["reference"] = wx.CheckBox(self.panel, label=f"{option['label']}")
             option["reference"].SetValue(option["default"])
             self.right_sizer.Add(option["reference"], 0, wx.ALL, 5)
 
@@ -282,7 +278,7 @@ class MainWindow(wx.Frame):
             self.printer(f"Template salvato in: {template_directory}")
 
     def on_open_style_options(self, e):
-        dialog = OptionsWindow(self, title="Opzioni di stile")
+        dialog = StyleOptionsWindow(self, title="Opzioni di stile")
         if dialog.ShowModal() == wx.ID_OK:
             pass
             # Leggi lo stato delle checkbox e aggiorna l'etichetta
@@ -317,7 +313,7 @@ class MainWindow(wx.Frame):
                 option["reference"].GetValue())
 
         self.start_btn.Disable()
-        self.worker_thread = Worker(self.run_examly, self.on_complete)
+        self.worker_thread = ExamlyWorker(self.run_examly, self.on_complete)
         self.worker_thread.start()
 
     def on_complete(self, e):
@@ -360,12 +356,6 @@ class MainWindow(wx.Frame):
             self.global_filters_sizer.Add(
                 filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
         self.global_filters_sizer.Layout()
-
-    def only_integer(self, event):
-        key_code = event.GetKeyCode()
-        if not (ord('0') <= key_code <= ord('9')) and key_code != wx.WXK_BACK:
-            return
-        event.Skip()
 
     def printer(self, message):
         self.console_output.AppendText(
