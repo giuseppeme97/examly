@@ -24,6 +24,9 @@ class Word():
         self.set_header()
         self.set_title()
 
+        if Configuration.get_is_subtitle_included():
+            self.set_subtitle()
+
         if Configuration.get_are_pages_numbered():
             self.set_number_page()
 
@@ -34,21 +37,25 @@ class Word():
         self.doc.styles['Normal'].font.name = Configuration.get_font()
 
     def set_language(self) -> None:
-        self.doc.styles.element.xpath('./w:docDefaults/w:rPrDefault/w:rPr')[0].xpath(
-            'w:lang')[0].set(docx.oxml.shared.qn('w:val'), Configuration.get_language())
+        self.doc.styles.element.xpath('./w:docDefaults/w:rPrDefault/w:rPr')[0].xpath('w:lang')[0].set(docx.oxml.shared.qn('w:val'), Configuration.get_language())
 
     def set_title(self) -> None:
-        paragraph = self.doc.add_paragraph(Configuration.get_document_title(
-        ) + f" - #{self.document_number}") if Configuration.get_are_documents_numbered() else self.doc.add_paragraph(Configuration.get_document_title())
+        paragraph = self.doc.add_paragraph(Configuration.get_document_title() + f" - #{self.document_number}") if Configuration.get_are_documents_numbered() else self.doc.add_paragraph(Configuration.get_document_title())
         for run in paragraph.runs:
             run.bold = True
             run.font.size = Pt(Configuration.get_title_size())
         paragraph.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
+    def set_subtitle(self) -> None:
+        paragraph = self.doc.add_paragraph(Configuration.get_document_subtitle())
+        for run in paragraph.runs:
+            run.italic = True
+            run.font.size = Pt(Configuration.get_subtitle_size())
+        paragraph.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
     def set_margin(self) -> None:
         self.doc.sections[0].left_margin = Cm(Configuration.get_left_margin())
-        self.doc.sections[0].right_margin = Cm(
-            Configuration.get_right_margin())
+        self.doc.sections[0].right_margin = Cm(Configuration.get_right_margin())
 
     def set_number_page(self) -> None:
         fldChar1 = OxmlElement('w:fldChar')
@@ -59,18 +66,15 @@ class Word():
         fldChar2 = OxmlElement('w:fldChar')
         fldChar2.set(ns.qn('w:fldCharType'), 'end')
         self.doc.sections[0].footer.paragraphs[0].add_run()._r.append(fldChar1)
-        self.doc.sections[0].footer.paragraphs[0].add_run(
-        )._r.append(instrText)
+        self.doc.sections[0].footer.paragraphs[0].add_run()._r.append(instrText)
         self.doc.sections[0].footer.paragraphs[0].add_run()._r.append(fldChar2)
 
     def set_header(self) -> None:
-        self.doc.sections[0].header.paragraphs[0].text = Configuration.get_document_header(
-        )
+        self.doc.sections[0].header.paragraphs[0].text = Configuration.get_document_header()
 
     def set_columns(self) -> None:
         self.doc.add_section(WD_SECTION.CONTINUOUS)
-        self.doc.sections[1]._sectPr.xpath(
-            './w:cols')[0].set(qn('w:num'), str(Configuration.get_columns_number()))
+        self.doc.sections[1]._sectPr.xpath('./w:cols')[0].set(qn('w:num'), str(Configuration.get_columns_number()))
 
     def add_image_shape(self, image: object) -> None:
         # Accedi all'elemento XML dell'immagine
@@ -98,13 +102,11 @@ class Word():
         spPr.append(ln)
 
     def add_question_header(self, question_header: str, question_image: str) -> None:
-        text_header = f"{question_header}\n" if question_image else f"{
-            question_header}"
+        text_header = f"{question_header}\n" if question_image else f"{question_header}"
         header = self.doc.add_heading(text_header, 3)
         if question_image:
             run_i = header.add_run()
-            image = run_i.add_picture(question_image, width=Inches(
-                Configuration.get_images_size()))
+            image = run_i.add_picture(question_image, width=Inches(Configuration.get_images_size()))
             self.add_image_shape(image)
 
         if not question_image:
@@ -130,8 +132,7 @@ class Word():
 
     def write_questions(self) -> None:
         for index, question in enumerate(self.questions):
-            question_header = (
-                f"{index + 1}) " if Configuration.get_are_questions_numbered() else "") + question['question']
+            question_header = (f"{index + 1}) " if Configuration.get_are_questions_numbered() else "") + question['question']
             question_image = question['image']
 
             self.add_question_header(question_header, question_image)
@@ -140,7 +141,6 @@ class Word():
 
     def save(self) -> str:
         suffix = "_solutions" if self.is_solution else ""
-        document_path = f"{Configuration.get_documents_directory(
-        )}/{Configuration.get_document_filename()}_{str(self.document_number)}{suffix}.docx"
+        document_path = f"{Configuration.get_documents_directory()}/{Configuration.get_document_filename()}_{str(self.document_number)}{suffix}.docx"
         self.doc.save(document_path)
         return document_path

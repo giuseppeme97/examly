@@ -1,15 +1,31 @@
 import json
 
 class Configuration:
-    app_name = "Examly"
-    working_path = "/Users/giuseppe/Documents/examly"
+    default_app_name = "Examly"
+    default_fonts_list = ["Liberation Sans", "Arial", "Courier", "Times New Roman"]
+    default_languages_list = ["it-IT", "en-EN"]
+    default_excel_formats_supported = [".xlsx", ".xls"]
+    default_table_formats_supported = [".csv"]
+    default_template_filename = "template.xlsx"
+    default_subject_denomination = "MATERIA"
+    default_classroom_denomination = "CLASSE"
+    default_period_denomination = "PERIODO"
+    default_sector_denomination = "SETTORE"
+    default_include_denomination = "INCLUDERE"
+    default_question_denomination = "DOMANDA"
+    default_image_denomination = "IMMAGINE"
+    default_solution_denomination = "CORRETTA"
+    default_option_denomination = "OPZIONE"
+    default_include_accept_denomination = "SI"
+    default_document_header = "Cognome e Nome: ________________________________________________________"
+
+    # ------------------------------- #
+    
     soffice_path = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
     source_file = "/Users/giuseppe/Documents/examly/Domande.xlsx"
-    session_file = "/Users/giuseppe/Documents/examly/sessione.json"
     documents_directory = "/Users/giuseppe/Documents/examly/output"
     images_directory = "/Users/giuseppe/Documents/examly/images"
     template_directory = "/Users/giuseppe/Documents/examly/template"
-    template_filename = "template.xlsx"
     document_filename = "esame"
     zip_filename = "compito"
     subjects = ["INFORMATICA"]
@@ -17,10 +33,10 @@ class Configuration:
     periods = [1]
     sectors = []
     document_title = "Prova comune di Informatica - A.S. 2024/2025 - Classi 3F 3G 3H 3I"
-    document_header = "Cognome e Nome: ________________________________________________________"
+    document_subtitle = "Segnare solo una delle quattro opzioni per ciascuna domanda."
     documents_number = 2
     questions_number = 20
-    from_session = False    # not implemented
+    is_subtitle_included = False
     are_pages_numbered = True
     are_documents_numbered = True
     are_questions_numbered = True
@@ -30,47 +46,24 @@ class Configuration:
     are_questions_single_included = False
     are_documents_exported_to_pdf = False
     are_documents_included_to_zip = False
-    export_session = False  # not implemented
     exact_document_number = None
-    excel_formats_supported = [".xlsx", ".xls"]
-    table_formats_supported = [".csv"]
-    subject_denomination = "MATERIA"
-    classroom_denomination = "CLASSE"
-    period_denomination = "PERIODO"
-    sector_denomination = "SETTORE"
-    include_denomination = "INCLUDERE"
-    question_denomination = "DOMANDA"
-    image_denomination = "IMMAGINE"
-    solution_denomination = "CORRETTA"
-    option_denomination = "OPZIONE"
-    include_accept_denomination = "SI"
-    font = "Liberation Sans"
-    language  = "it-IT"
+    font = default_fonts_list[0]
+    language  = default_languages_list[0]
     title_size = 15
+    subtitle_size = 12
     questions_size = 11
     images_size = 3.5
-    questions_distance = 5
-    questions_RGB_color = [0, 0, 0]
     columns_number = 2
     left_margin = 1
     right_margin = 1
-    DSA = False
-
+    
     @classmethod
     def set_app_name(cls, value):
-        cls.app_name = value
+        cls.default_app_name = value
 
     @classmethod
     def get_app_name(cls):
-        return cls.app_name
-
-    @classmethod
-    def set_working_path(cls, value):
-        cls.working_path = value
-
-    @classmethod
-    def get_working_path(cls):
-        return cls.working_path
+        return cls.default_app_name
 
     @classmethod
     def set_soffice_path(cls, value):
@@ -87,14 +80,6 @@ class Configuration:
     @classmethod
     def get_source_file(cls):
         return cls.source_file
-
-    @classmethod
-    def set_session_file(cls, value):
-        cls.session_file = value
-
-    @classmethod
-    def get_session_file(cls):
-        return cls.session_file
 
     @classmethod
     def set_documents_directory(cls, value):
@@ -122,11 +107,11 @@ class Configuration:
 
     @classmethod
     def set_template_filename(cls, value):
-        cls.template_filename = value
+        cls.default_template_filename = value
 
     @classmethod
     def get_template_filename(cls):
-        return cls.template_filename
+        return cls.default_template_filename
 
     @classmethod
     def set_document_filename(cls, value):
@@ -183,14 +168,22 @@ class Configuration:
     @classmethod
     def get_document_title(cls):
         return cls.document_title
+    
+    @classmethod
+    def set_document_subtitle(cls, value):
+        cls.document_subtitle = value
+
+    @classmethod
+    def get_document_subtitle(cls):
+        return cls.document_subtitle
 
     @classmethod
     def set_document_header(cls, value):
-        cls.document_header = value
+        cls.default_document_header = value
 
     @classmethod
     def get_document_header(cls):
-        return cls.document_header
+        return cls.default_document_header
 
     @classmethod
     def set_documents_number(cls, value):
@@ -207,15 +200,15 @@ class Configuration:
     @classmethod
     def get_questions_number(cls):
         return cls.questions_number
+    
+    @classmethod
+    def set_is_subtitle_included(cls, value):
+        cls.is_subtitle_included = value
 
     @classmethod
-    def set_from_session(cls, value):
-        cls.from_session = value
-
-    @classmethod
-    def get_from_session(cls):
-        return cls.from_session
-
+    def get_is_subtitle_included(cls):
+        return cls.is_subtitle_included
+    
     @classmethod
     def set_are_pages_numbered(cls, value):
         cls.are_pages_numbered = value
@@ -289,14 +282,6 @@ class Configuration:
         return cls.are_documents_included_to_zip
 
     @classmethod
-    def set_export_session(cls, value):
-        cls.export_session = value
-
-    @classmethod
-    def get_export_session(cls):
-        return cls.export_session
-
-    @classmethod
     def set_exact_document_number(cls, value):
         cls.exact_document_number = value
 
@@ -306,100 +291,100 @@ class Configuration:
 
     @classmethod
     def set_excel_formats_supported(cls, value):
-        cls.excel_formats_supported = value
+        cls.default_excel_formats_supported = value
 
     @classmethod
     def get_excel_formats_supported(cls):
-        return cls.excel_formats_supported
+        return cls.default_excel_formats_supported
 
     @classmethod
     def set_table_formats_supported(cls, value):
-        cls.table_formats_supported = value
+        cls.default_table_formats_supported = value
 
     @classmethod
     def get_table_formats_supported(cls):
-        return cls.table_formats_supported
+        return cls.default_table_formats_supported
 
     @classmethod
     def set_subject_denomination(cls, value):
-        cls.subject_denomination = value
+        cls.default_subject_denomination = value
 
     @classmethod
     def get_subject_denomination(cls):
-        return cls.subject_denomination
+        return cls.default_subject_denomination
     
     @classmethod
     def set_classroom_denomination(cls, value):
-        cls.classroom_denomination = value
+        cls.default_classroom_denomination = value
 
     @classmethod
     def get_classroom_denomination(cls):
-        return cls.classroom_denomination
+        return cls.default_classroom_denomination
 
     # period_denomination
     @classmethod
     def set_period_denomination(cls, value):
-        cls.period_denomination = value
+        cls.default_period_denomination = value
 
     @classmethod
     def get_period_denomination(cls):
-        return cls.period_denomination
+        return cls.default_period_denomination
 
     @classmethod
     def set_sector_denomination(cls, value):
-        cls.sector_denomination = value
+        cls.default_sector_denomination = value
 
     @classmethod
     def get_sector_denomination(cls):
-        return cls.sector_denomination
+        return cls.default_sector_denomination
 
     @classmethod
     def set_include_denomination(cls, value):
-        cls.include_denomination = value
+        cls.default_include_denomination = value
 
     @classmethod
     def get_include_denomination(cls):
-        return cls.include_denomination
+        return cls.default_include_denomination
 
     @classmethod
     def set_question_denomination(cls, value):
-        cls.question_denomination = value
+        cls.default_question_denomination = value
 
     @classmethod
     def get_question_denomination(cls):
-        return cls.question_denomination
+        return cls.default_question_denomination
 
     @classmethod
     def set_image_denomination(cls, value):
-        cls.image_denomination = value
+        cls.default_image_denomination = value
 
     @classmethod
     def get_image_denomination(cls):
-        return cls.image_denomination
+        return cls.default_image_denomination
 
     @classmethod
     def set_solution_denomination(cls, value):
-        cls.solution_denomination = value
+        cls.default_solution_denomination = value
 
     @classmethod
     def get_solution_denomination(cls):
-        return cls.solution_denomination
+        return cls.default_solution_denomination
 
     @classmethod
     def set_option_denomination(cls, value):
-        cls.option_denomination = value
+        cls.default_option_denomination = value
 
     @classmethod
     def get_option_denomination(cls):
-        return cls.option_denomination
+        return cls.default_option_denomination
 
     @classmethod
     def set_include_accept_denomination(cls, value):
-        cls.include_accept_denomination = value
+        cls.default_include_accept_denomination = value
 
     @classmethod
     def get_include_accept_denomination(cls):
-        return cls.include_accept_denomination
+        return cls.default_include_accept_denomination
 
     @classmethod
     def set_font(cls, value):
@@ -424,6 +409,14 @@ class Configuration:
     @classmethod
     def get_title_size(cls):
         return cls.title_size
+    
+    @classmethod
+    def set_subtitle_size(cls, value):
+        cls.subtitle_size = int(value)
+
+    @classmethod
+    def get_subtitle_size(cls):
+        return cls.subtitle_size
 
     @classmethod
     def set_questions_size(cls, value):
@@ -440,22 +433,6 @@ class Configuration:
     @classmethod
     def get_images_size(cls):
         return cls.images_size
-    
-    @classmethod
-    def set_questions_distance(cls, value):
-        cls.questions_distance = int(value)
-
-    @classmethod
-    def get_questions_distance(cls):
-        return cls.questions_distance
-
-    @classmethod
-    def set_questions_RGB_color(cls, value):
-        cls.questions_RGB_color = int(value)
-
-    @classmethod
-    def get_questions_RGB_color(cls):
-        return cls.questions_RGB_color
 
     @classmethod
     def set_columns_number(cls, value):
@@ -503,6 +480,11 @@ class Configuration:
         }
 
         control_options = {
+            Configuration.get_is_subtitle_included.__name__.removeprefix("get_"): {
+                "label": "Inserisci sottotitolo",
+                "reference": None,
+                "default": Configuration.get_is_subtitle_included()
+            },
             Configuration.get_are_pages_numbered.__name__.removeprefix("get_"): {
                 "label": "Inserisci numero di pagina",
                 "reference": None,
@@ -547,17 +529,10 @@ class Configuration:
                 "label": "Esporta in ZIP",
                 "reference": None,
                 "default": Configuration.get_are_documents_included_to_zip()
-            },
-            # Configuration.get_export_session.__name__.removeprefix("get_"): {
-            #     "label": "Esporta sessione (non implementata)",
-            #     "reference": None,
-            #     "default": Configuration.get_export_session()
-            # }
+            }
         }
 
-        fonts = [Configuration.get_font(), "Arial", "Courier", "Times New Roman"]
-        languages = [Configuration.get_language(), "en-EN"]
-        return filters, control_options, fonts, languages
+        return filters, control_options, cls.default_fonts_list, cls.default_languages_list
 
     @classmethod
     def export_config(cls, file_path):

@@ -11,54 +11,46 @@ class Examly():
     def __init__(self, console: callable = None) -> None:
         self.source_validated: bool = None
         self.console: callable = console if console else print
-
         self.console("Istanza di Examly creata.")
         if not Utils.check_soffice(Configuration.get_soffice_path()):
-            self.console(
-                "Comando soffice non presente nell'ambiente di esecuzione.")
+            self.console("Comando soffice non presente nell'ambiente di esecuzione.")
 
     def load_source(self) -> None:
         self.source = Source()
         if self.source.is_loaded():
             questions_log = self.source.check_questions()
             if len(questions_log) > 0:
-                self.console(
-                    "\nERRORE: Alcune domande presenti nella sorgente non sono complete.")
+                self.console("\nERRORE: Alcune domande presenti nella sorgente non sono complete.")
                 self.console("Indici domande:")
                 self.console(" ".join(map(str, questions_log)))
                 self.source_validated = False
 
             options_log = self.source.check_options_number()
             if len(options_log) > 0:
-                self.console(
-                    "\nERRORE: Alcune domande presenti nella sorgente non hanno un numero idoneo di opzioni.")
+                self.console("\nERRORE: Alcune domande presenti nella sorgente non hanno un numero idoneo di opzioni.")
                 self.console("Indici domande:")
                 self.console(" ".join(map(str, options_log)))
                 self.source_validated = False
 
             orphans_log = self.source.check_orphan_questions()
             if len(orphans_log) > 0:
-                self.console(
-                    "\nERRORE: Alcune domande presenti nella sorgente non hanno alcune categorie assegnate.")
+                self.console("\nERRORE: Alcune domande presenti nella sorgente non hanno alcune categorie assegnate.")
                 self.console("Indici domande:")
                 self.console(" ".join(map(str, orphans_log)))
                 self.source_validated = False
 
             solutions_log = self.source.check_solutions()
             if len(solutions_log) > 0:
-                self.console(
-                    "\nATTENZIONE: Alcune domande presenti nella sorgente non hanno specificata l'opzione corretta.")
+                self.console("\nATTENZIONE: Alcune domande presenti nella sorgente non hanno specificata l'opzione corretta.")
                 self.console("Indici domande:")
                 self.console(" ".join(map(str, solutions_log)))
 
             if Configuration.get_images_directory():
                 images_log = self.source.check_images()
                 if len(images_log["file_mancanti"]) > 0:
-                    self.console(
-                        "\nATTENZIONE: Alcune immagini presenti nella sorgente non sono state trovate.")
+                    self.console("\nATTENZIONE: Alcune immagini presenti nella sorgente non sono state trovate.")
                     self.console("Immagini non trovate:")
-                    self.console(
-                        " ".join(map(str, images_log["file_mancanti"])))
+                    self.console(" ".join(map(str, images_log["file_mancanti"])))
 
             self.console("Sorgente caricata correttamente.")
             self.source_validated = True
@@ -123,29 +115,23 @@ class Examly():
         self.console("Genero documenti...")
 
         if Utils.is_integer(Configuration.get_exact_document_number()):
-            documents_iterator = range(Configuration.get_exact_document_number(
-            ), Configuration.get_exact_document_number() + 1)
+            documents_iterator = range(Configuration.get_exact_document_number(), Configuration.get_exact_document_number() + 1)
         else:
-            documents_iterator = range(
-                1, Configuration.get_documents_number() + 1)
+            documents_iterator = range(1, Configuration.get_documents_number() + 1)
 
         for document_number in documents_iterator:
             questions, _ = self.source.get_questions()
             sampled_questions = self.sample_questions(questions)
-            document_path = self.write_exam(
-                sampled_questions, document_number, is_solution=False)
+            document_path = self.write_exam(sampled_questions, document_number, is_solution=False)
 
             if Configuration.get_are_documents_exported_to_pdf():
-                Utils.export_to_pdf(
-                    Configuration.get_soffice_path(), Configuration.get_documents_directory(), document_path)
+                Utils.export_to_pdf(Configuration.get_soffice_path(), Configuration.get_documents_directory(), document_path)
 
             if Configuration.get_are_solutions_exported():
-                solution_path = self.write_exam(
-                    sampled_questions, document_number, is_solution=True)
+                solution_path = self.write_exam(sampled_questions, document_number, is_solution=True)
 
                 if Configuration.get_are_documents_exported_to_pdf():
-                    Utils.export_to_pdf(
-                        Configuration.get_soffice_path(), Configuration.get_documents_directory(), solution_path)
+                    Utils.export_to_pdf(Configuration.get_soffice_path(), Configuration.get_documents_directory(), solution_path)
 
         if Configuration.get_are_documents_included_to_zip():
             self.export_to_zip()
@@ -154,8 +140,7 @@ class Examly():
 
     def export_to_zip(self) -> None:
         zip_filename = f"{Configuration.get_zip_filename()}.zip"
-        Utils.directory_to_zip(
-            Configuration.get_documents_directory(), zip_filename)
+        Utils.directory_to_zip(Configuration.get_documents_directory(), zip_filename)
 
 
 if __name__ == "__main__":

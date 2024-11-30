@@ -61,13 +61,6 @@ class StyleOptionsWindow(wx.Dialog):
         self.images_size_input.Bind(wx.EVT_CHAR, Utils.only_integer)
         grid_sizer.Add(self.images_size_input, 1, wx.EXPAND)
 
-        # Text control per "Distanza fra domande"
-        # grid_sizer.Add(wx.StaticText(panel, label="Distanza fra domande:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        # self.questions_distance_input = wx.TextCtrl(panel, value=str(Configuration.get_questions_distance()))
-        # self.questions_distance_input.SetHint(str(Configuration.get_questions_distance()))
-        # self.questions_distance_input.Bind(wx.EVT_CHAR, Utils.only_integer)
-        # grid_sizer.Add(self.questions_distance_input, 1, wx.EXPAND)
-
         # Text control per "Numero di colonne della sezione"
         grid_sizer.Add(wx.StaticText(panel, label="Numero di colonne della sezione:"), 0, wx.ALIGN_CENTER_VERTICAL)
         self.columns_number_input = wx.TextCtrl(panel, value=str(Configuration.get_columns_number()))
@@ -124,8 +117,7 @@ class MainWindow(wx.Frame):
 
         # Pulsante source_file
         source_file_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.source_file_label = wx.StaticText(
-            self.panel, label="Nessuna sorgente selezionata")
+        self.source_file_label = wx.StaticText(self.panel, label="Nessuna sorgente selezionata")
         source_file_btn = wx.Button(self.panel, label="Sorgente domande...")
         source_file_btn.Bind(wx.EVT_BUTTON, self.on_select_source_file)
         source_file_sizer.Add(source_file_btn, 0, wx.ALL | wx.CENTER, 5)
@@ -134,30 +126,20 @@ class MainWindow(wx.Frame):
 
         # Pulsante images_directory
         images_directory_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.images_directory_label = wx.StaticText(
-            self.panel, label="Nessuna cartella immagini selezionata")
-        images_directory_btn = wx.Button(
-            self.panel, label="Sorgente immagini...")
-        images_directory_btn.Bind(
-            wx.EVT_BUTTON, self.on_select_images_directory)
-        images_directory_sizer.Add(
-            images_directory_btn, 0, wx.ALL | wx.CENTER, 5)
-        images_directory_sizer.Add(
-            self.images_directory_label, 1, wx.ALL | wx.CENTER, 5)
+        self.images_directory_label = wx.StaticText(self.panel, label="Nessuna cartella immagini selezionata")
+        images_directory_btn = wx.Button(self.panel, label="Sorgente immagini...")
+        images_directory_btn.Bind(wx.EVT_BUTTON, self.on_select_images_directory)
+        images_directory_sizer.Add(images_directory_btn, 0, wx.ALL | wx.CENTER, 5)
+        images_directory_sizer.Add(self.images_directory_label, 1, wx.ALL | wx.CENTER, 5)
         self.left_sizer.Add(images_directory_sizer, 0, wx.EXPAND)
 
         # Pulsante documents_directory
         documents_directory_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.documents_directory_label = wx.StaticText(
-            self.panel, label="Nessuna destinazione selezionata")
-        documents_directory_btn = wx.Button(
-            self.panel, label="Destinazione documenti...")
-        documents_directory_btn.Bind(
-            wx.EVT_BUTTON, self.on_select_documents_directory)
-        documents_directory_sizer.Add(
-            documents_directory_btn, 0, wx.ALL | wx.CENTER, 5)
-        documents_directory_sizer.Add(
-            self.documents_directory_label, 1, wx.ALL | wx.CENTER, 5)
+        self.documents_directory_label = wx.StaticText(self.panel, label="Nessuna destinazione selezionata")
+        documents_directory_btn = wx.Button(self.panel, label="Destinazione documenti...")
+        documents_directory_btn.Bind(wx.EVT_BUTTON, self.on_select_documents_directory)
+        documents_directory_sizer.Add(documents_directory_btn, 0, wx.ALL | wx.CENTER, 5)
+        documents_directory_sizer.Add(self.documents_directory_label, 1, wx.ALL | wx.CENTER, 5)
         self.left_sizer.Add(documents_directory_sizer, 0, wx.EXPAND)
 
         # Pulsante template
@@ -169,30 +151,38 @@ class MainWindow(wx.Frame):
 
         # Inserimento document_filename
         self.document_filename_input = wx.TextCtrl(self.panel, value=Configuration.get_document_filename())
-        self.document_filename_input.SetHint(Configuration.get_document_filename())
+        self.document_filename_input.SetHint("Inserire nome dei file...")
         self.left_sizer.Add(wx.StaticText(self.panel, label="Prefisso dei documenti:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.document_filename_input, 0, wx.ALL | wx.EXPAND, 5)
 
         # Inserimento document_title
         self.document_title_input = wx.TextCtrl(self.panel, value=Configuration.get_document_title())
-        self.document_title_input.SetHint(Configuration.get_document_title())
+        self.document_title_input.SetHint("Inserire un titolo...")
         self.left_sizer.Add(wx.StaticText(self.panel, label="Titolo dei documenti:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.document_title_input, 0, wx.ALL | wx.EXPAND, 5)
 
+        # Inserimento document_subtitle
+        self.document_subtitle_input = wx.TextCtrl(self.panel, value=Configuration.get_document_subtitle())
+        self.document_subtitle_input.SetHint("Inserire un sottotitolo...")
+        self.left_sizer.Add(wx.StaticText(self.panel, label="Sottotitolo dei documenti:"), 0, wx.ALL | wx.EXPAND, 5)
+        self.left_sizer.Add(self.document_subtitle_input, 0, wx.ALL | wx.EXPAND, 5)
+
         # Inserimento zip_filename
         self.zip_filename_input = wx.TextCtrl(self.panel, value=Configuration.get_zip_filename())
-        self.zip_filename_input.SetHint(Configuration.get_zip_filename())
+        self.zip_filename_input.SetHint("Inserire nome dello zip...")
         self.left_sizer.Add(wx.StaticText(self.panel, label="Nome file ZIP:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.zip_filename_input, 0, wx.ALL | wx.EXPAND, 5)
 
         # Inserimento documents_number
         self.documents_number_input = wx.TextCtrl(self.panel, style=wx.TE_PROCESS_ENTER, value=str(Configuration.get_documents_number()))
+        self.documents_number_input.SetHint("Inserire numero di documenti...")
         self.documents_number_input.Bind(wx.EVT_CHAR, Utils.only_integer)
         self.left_sizer.Add(wx.StaticText(self.panel, label="Numero di documenti:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.documents_number_input, 0, wx.ALL | wx.EXPAND, 5)
 
         # Inserimento questions_number
         self.questions_number_input = wx.TextCtrl(self.panel, style=wx.TE_PROCESS_ENTER, value=str(Configuration.get_questions_number()))
+        self.questions_number_input.SetHint("Inserire numero di domande...")
         self.questions_number_input.Bind(wx.EVT_CHAR, Utils.only_integer)
         self.left_sizer.Add(wx.StaticText(self.panel, label="Numero di domande per documento:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.questions_number_input, 0, wx.ALL | wx.EXPAND, 5)
@@ -228,8 +218,7 @@ class MainWindow(wx.Frame):
         self.main_sizer.Add(self.start_btn, 0, wx.ALL | wx.CENTER, 5)
 
         # Console
-        self.console_output = wx.TextCtrl(
-            self.panel, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
+        self.console_output = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2)
         self.main_sizer.Add(self.console_output, 0, wx.ALL | wx.EXPAND, 10)
 
         self.panel.SetSizer(self.main_sizer)
@@ -286,20 +275,16 @@ class MainWindow(wx.Frame):
             Configuration.set_title_size(dialog.title_size_input.GetValue())
             Configuration.set_questions_size(dialog.questions_size_input.GetValue())
             Configuration.set_images_size(dialog.images_size_input.GetValue())
-            # Configuration.set_questions_distance(dialog.questions_distance_input.GetValue())
             Configuration.set_columns_number(dialog.columns_number_input.GetValue())
             Configuration.set_left_margin(dialog.left_margin_input.GetValue())
             Configuration.set_right_margin(dialog.right_margin_input.GetValue())
         dialog.Destroy()
 
     def on_start(self, e):
-        Configuration.set_document_filename(
-            self.document_filename_input.GetValue())
+        Configuration.set_document_filename(self.document_filename_input.GetValue())
         Configuration.set_zip_filename(self.zip_filename_input.GetValue())
-        Configuration.set_documents_number(
-            int(self.documents_number_input.GetValue()))
-        Configuration.set_questions_number(
-            int(self.questions_number_input.GetValue()))
+        Configuration.set_documents_number(int(self.documents_number_input.GetValue()))
+        Configuration.set_questions_number(int(self.questions_number_input.GetValue()))
         Configuration.set_document_title(self.document_title_input.GetValue())
 
         for key in self.filters:
@@ -344,20 +329,16 @@ class MainWindow(wx.Frame):
 
         for _, filter_item in self.filters.items():
             filters_sizer = wx.BoxSizer(wx.VERTICAL)
-            filter_label = wx.StaticText(
-                self.panel, label=f"{filter_item['label']}")
+            filter_label = wx.StaticText(self.panel, label=f"{filter_item['label']}")
             filters_sizer.Add(filter_label, 0, wx.TOP | wx.LEFT, 5)
             for element in filter_item["items"]:
-                element["reference"] = wx.CheckBox(
-                    self.panel, label=str(element["label"]))
+                element["reference"] = wx.CheckBox(self.panel, label=str(element["label"]))
                 filters_sizer.Add(element["reference"], 0, wx.ALL, 5)
-            self.global_filters_sizer.Add(
-                filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
+            self.global_filters_sizer.Add(filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
         self.global_filters_sizer.Layout()
 
     def printer(self, message):
-        self.console_output.AppendText(
-            f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {message}' + "\n")
+        self.console_output.AppendText(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {message}' + "\n")
 
 
 if __name__ == '__main__':
