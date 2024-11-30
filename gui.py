@@ -49,31 +49,31 @@ class StyleOptionsWindow(wx.Dialog):
 
         # Text control per "dimensione domande"
         grid_sizer.Add(wx.StaticText(panel, label="Dimensione domande:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.question_size_input = wx.TextCtrl(panel, value=str(Configuration.get_questions_size()))
-        self.question_size_input.SetHint(str(Configuration.get_questions_size()))
-        self.question_size_input.Bind(wx.EVT_CHAR, Utils.only_integer)
-        grid_sizer.Add(self.question_size_input, 1, wx.EXPAND)
+        self.questions_size_input = wx.TextCtrl(panel, value=str(Configuration.get_questions_size()))
+        self.questions_size_input.SetHint(str(Configuration.get_questions_size()))
+        self.questions_size_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        grid_sizer.Add(self.questions_size_input, 1, wx.EXPAND)
 
         # Text control per "dimensione immagini"
         grid_sizer.Add(wx.StaticText(panel, label="Dimensione immagini:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.image_size_input = wx.TextCtrl(panel, value=str(Configuration.get_images_size()))
-        self.image_size_input.SetHint(str(Configuration.get_images_size()))
-        self.image_size_input.Bind(wx.EVT_CHAR, Utils.only_integer)
-        grid_sizer.Add(self.image_size_input, 1, wx.EXPAND)
+        self.images_size_input = wx.TextCtrl(panel, value=str(Configuration.get_images_size()))
+        self.images_size_input.SetHint(str(Configuration.get_images_size()))
+        self.images_size_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        grid_sizer.Add(self.images_size_input, 1, wx.EXPAND)
 
         # Text control per "Distanza fra domande"
-        grid_sizer.Add(wx.StaticText(panel, label="Distanza fra domande:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.questions_distance_input = wx.TextCtrl(panel, value=str(Configuration.get_questions_distance()))
-        self.questions_distance_input.SetHint(str(Configuration.get_questions_distance()))
-        self.questions_distance_input.Bind(wx.EVT_CHAR, Utils.only_integer)
-        grid_sizer.Add(self.questions_distance_input, 1, wx.EXPAND)
+        # grid_sizer.Add(wx.StaticText(panel, label="Distanza fra domande:"), 0, wx.ALIGN_CENTER_VERTICAL)
+        # self.questions_distance_input = wx.TextCtrl(panel, value=str(Configuration.get_questions_distance()))
+        # self.questions_distance_input.SetHint(str(Configuration.get_questions_distance()))
+        # self.questions_distance_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        # grid_sizer.Add(self.questions_distance_input, 1, wx.EXPAND)
 
         # Text control per "Numero di colonne della sezione"
         grid_sizer.Add(wx.StaticText(panel, label="Numero di colonne della sezione:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.column_number_input = wx.TextCtrl(panel, value=str(Configuration.get_columns_number()))
-        self.column_number_input.SetHint(str(Configuration.get_columns_number()))
-        self.column_number_input.Bind(wx.EVT_CHAR, Utils.only_integer)
-        grid_sizer.Add(self.column_number_input, 1, wx.EXPAND)
+        self.columns_number_input = wx.TextCtrl(panel, value=str(Configuration.get_columns_number()))
+        self.columns_number_input.SetHint(str(Configuration.get_columns_number()))
+        self.columns_number_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        grid_sizer.Add(self.columns_number_input, 1, wx.EXPAND)
 
         # Text control per "Dimensione margine sinistro"
         grid_sizer.Add(wx.StaticText(panel, label="Dimensione margine sinistro:"), 0, wx.ALIGN_CENTER_VERTICAL)
@@ -278,20 +278,18 @@ class MainWindow(wx.Frame):
             self.printer(f"Template salvato in: {template_directory}")
 
     def on_open_style_options(self, e):
+        _, _, fonts, languages = Configuration.get_configs()
         dialog = StyleOptionsWindow(self, title="Opzioni di stile")
         if dialog.ShowModal() == wx.ID_OK:
-            pass
-            # Leggi lo stato delle checkbox e aggiorna l'etichetta
-            # selections = []
-            # if dialog.checkbox1.GetValue():
-            #     selections.append("Opzione 1")
-            # if dialog.checkbox2.GetValue():
-            #     selections.append("Opzione 2")
-            # if dialog.checkbox3.GetValue():
-            #     selections.append("Opzione 3")
-            # self.result_label.SetLabel(
-            #     "Selezioni: " + ", ".join(selections) if selections else "Nessuna")
-
+            Configuration.set_font(fonts[dialog.font_selection.GetSelection()])
+            Configuration.set_language(languages[dialog.language_selection.GetSelection()])
+            Configuration.set_title_size(dialog.title_size_input.GetValue())
+            Configuration.set_questions_size(dialog.questions_size_input.GetValue())
+            Configuration.set_images_size(dialog.images_size_input.GetValue())
+            # Configuration.set_questions_distance(dialog.questions_distance_input.GetValue())
+            Configuration.set_columns_number(dialog.columns_number_input.GetValue())
+            Configuration.set_left_margin(dialog.left_margin_input.GetValue())
+            Configuration.set_right_margin(dialog.right_margin_input.GetValue())
         dialog.Destroy()
 
     def on_start(self, e):
@@ -316,7 +314,7 @@ class MainWindow(wx.Frame):
         self.worker_thread = ExamlyWorker(self.run_examly, self.on_complete)
         self.worker_thread.start()
 
-    def on_complete(self, e):
+    def on_complete(self, *e):
         if not self.worker_thread.is_alive():
             self.start_btn.Enable()
 

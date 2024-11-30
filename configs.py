@@ -18,19 +18,19 @@ class Configuration:
     sectors = []
     document_title = "Prova comune di Informatica - A.S. 2024/2025 - Classi 3F 3G 3H 3I"
     document_header = "Cognome e Nome: ________________________________________________________"
-    documents_number = 1
+    documents_number = 2
     questions_number = 20
-    from_session = False
+    from_session = False    # not implemented
     are_pages_numbered = True
     are_documents_numbered = True
     are_questions_numbered = True
     are_questions_shuffled = True
     are_options_shuffled = True
-    are_solutions_exported = True
-    are_questions_single_included = True
+    are_solutions_exported = False
+    are_questions_single_included = False
     are_documents_exported_to_pdf = False
     are_documents_included_to_zip = False
-    export_session = False
+    export_session = False  # not implemented
     exact_document_number = None
     excel_formats_supported = [".xlsx", ".xls"]
     table_formats_supported = [".csv"]
@@ -419,7 +419,7 @@ class Configuration:
 
     @classmethod
     def set_title_size(cls, value):
-        cls.title_size = value
+        cls.title_size = int(value)
 
     @classmethod
     def get_title_size(cls):
@@ -427,7 +427,7 @@ class Configuration:
 
     @classmethod
     def set_questions_size(cls, value):
-        cls.questions_size = value
+        cls.questions_size = int(value)
 
     @classmethod
     def get_questions_size(cls):
@@ -435,7 +435,7 @@ class Configuration:
     
     @classmethod
     def set_images_size(cls, value):
-        cls.images_size = value
+        cls.images_size = float(value)
 
     @classmethod
     def get_images_size(cls):
@@ -443,7 +443,7 @@ class Configuration:
     
     @classmethod
     def set_questions_distance(cls, value):
-        cls.questions_distance = value
+        cls.questions_distance = int(value)
 
     @classmethod
     def get_questions_distance(cls):
@@ -451,7 +451,7 @@ class Configuration:
 
     @classmethod
     def set_questions_RGB_color(cls, value):
-        cls.questions_RGB_color = value
+        cls.questions_RGB_color = int(value)
 
     @classmethod
     def get_questions_RGB_color(cls):
@@ -459,7 +459,7 @@ class Configuration:
 
     @classmethod
     def set_columns_number(cls, value):
-        cls.columns_number = value
+        cls.columns_number = int(value)
 
     @classmethod
     def get_columns_number(cls):
@@ -467,7 +467,7 @@ class Configuration:
 
     @classmethod
     def set_left_margin(cls, value):
-        cls.left_margin = value
+        cls.left_margin = int(value)
 
     @classmethod
     def get_left_margin(cls):
@@ -475,7 +475,7 @@ class Configuration:
 
     @classmethod
     def set_right_margin(cls, value):
-        cls.right_margin = value
+        cls.right_margin = int(value)
 
     @classmethod
     def get_right_margin(cls):
@@ -544,18 +544,16 @@ class Configuration:
                 "default": Configuration.get_are_documents_exported_to_pdf()
             },
             Configuration.get_are_documents_included_to_zip.__name__.removeprefix("get_"): {
-                "label": "Esporta in ZIP (beta)",
+                "label": "Esporta in ZIP",
                 "reference": None,
                 "default": Configuration.get_are_documents_included_to_zip()
             },
-            Configuration.get_export_session.__name__.removeprefix("get_"): {
-                "label": "Esporta sessione (non implementata)",
-                "reference": None,
-                "default": Configuration.get_export_session()
-            }
+            # Configuration.get_export_session.__name__.removeprefix("get_"): {
+            #     "label": "Esporta sessione (non implementata)",
+            #     "reference": None,
+            #     "default": Configuration.get_export_session()
+            # }
         }
-
-
 
         fonts = [Configuration.get_font(), "Arial", "Courier", "Times New Roman"]
         languages = [Configuration.get_language(), "en-EN"]
