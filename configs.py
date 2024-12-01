@@ -34,6 +34,7 @@ class Configuration:
     document_subtitle = "Segnare solo una delle quattro opzioni per ciascuna domanda."
     documents_number = 2
     questions_number = 20
+    is_header_included = True
     is_subtitle_included = False
     are_pages_numbered = True
     are_documents_numbered = True
@@ -42,8 +43,8 @@ class Configuration:
     are_options_shuffled = True
     are_solutions_exported = False
     are_questions_single_included = False
-    are_documents_exported_to_pdf = False
-    are_documents_included_to_zip = False
+    are_documents_exported_to_pdf = True
+    are_documents_included_to_zip = True
     exact_document_number = None
     font = default_fonts_list[0]
     language  = default_languages_list[0]
@@ -174,6 +175,14 @@ class Configuration:
     @classmethod
     def get_questions_number(cls):
         return cls.questions_number
+    
+    @classmethod
+    def set_is_header_included(cls, value):
+        cls.is_header_included = value
+
+    @classmethod
+    def get_is_header_included(cls):
+        return cls.is_header_included
     
     @classmethod
     def set_is_subtitle_included(cls, value):
@@ -402,6 +411,11 @@ class Configuration:
     @classmethod
     def get_control_options(cls):
         return {
+            Configuration.get_is_header_included.__name__.removeprefix("get_"): {
+                "label": "Inserisci cognome nome",
+                "reference": None,
+                "default": Configuration.get_is_header_included()
+            },
             Configuration.get_is_subtitle_included.__name__.removeprefix("get_"): {
                 "label": "Inserisci sottotitolo",
                 "reference": None,
@@ -433,7 +447,7 @@ class Configuration:
                 "default": Configuration.get_are_options_shuffled()
             },
             Configuration.get_are_solutions_exported.__name__.removeprefix("get_"): {
-                "label": "Esporta correttori",
+                "label": "Esporta soluzioni",
                 "reference": None,
                 "default": Configuration.get_are_solutions_exported()
             },

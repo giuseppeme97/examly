@@ -40,22 +40,22 @@ class Utils:
             return False
 
     @staticmethod
-    def export_to_pdf(soffice_path, destination_directory, file_path) -> bool:
+    def export_to_pdf(soffice_path, destination_directory, file_path) -> str:
         command = [soffice_path, "--headless", "--convert-to", "pdf", "--outdir", destination_directory, file_path]
 
         try:
             subprocess.run(command, check=True, capture_output=True, text=True)
-            return True
+            return file_path.replace(".docx", ".pdf")
         except:
-            return False
+            return None
 
     @staticmethod
-    def directory_to_zip(documents_directory, zip_filename) -> str:
+    def documents_to_zip(documents_directory, documents_list, zip_filename) -> str:
         zip_path = f"{documents_directory}/{zip_filename}"
         with zipfile.ZipFile(zip_path, 'w') as zipf:
             for file in os.listdir(documents_directory):
-                if file.endswith('.docx'):
-                    document_path = os.path.join(documents_directory, file)
+                document_path = os.path.join(documents_directory, file)
+                if document_path in documents_list:
                     zipf.write(document_path, file)
                     os.remove(document_path)
         return zip_path
@@ -66,3 +66,4 @@ class Utils:
         if not (ord('0') <= key_code <= ord('9')) and key_code != wx.WXK_BACK:
             return
         event.Skip()
+

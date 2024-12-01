@@ -103,6 +103,7 @@ class Examly():
 
     def write_exams(self) -> None:
         Path(Configuration.get_documents_directory()).mkdir(parents=True, exist_ok=True)
+        documents_list = []
         print("Genero documenti...")
 
         if Utils.is_integer(Configuration.get_exact_document_number()):
@@ -113,25 +114,29 @@ class Examly():
         for document_number in documents_iterator:
             questions, _ = self.source.get_questions()
             sampled_questions = self.sample_questions(questions)
-            document_path = self.write_exam(sampled_questions, document_number, is_solution=False)
+            document_word_path = self.write_exam(sampled_questions, document_number, is_solution=False)
+            documents_list.append(document_word_path)
 
             if Configuration.get_are_documents_exported_to_pdf():
-                Utils.export_to_pdf(Configuration.get_soffice_path(), Configuration.get_documents_directory(), document_path)
+                document_pdf_path = Utils.export_to_pdf(Configuration.get_soffice_path(), Configuration.get_documents_directory(), document_word_path)
+                documents_list.append(document_pdf_path)
 
             if Configuration.get_are_solutions_exported():
-                solution_path = self.write_exam(sampled_questions, document_number, is_solution=True)
+                solution_word_path = self.write_exam(sampled_questions, document_number, is_solution=True)
+                documents_list.append(solution_word_path)
 
                 if Configuration.get_are_documents_exported_to_pdf():
-                    Utils.export_to_pdf(Configuration.get_soffice_path(), Configuration.get_documents_directory(), solution_path)
+                    solution_pdf_path = Utils.export_to_pdf(Configuration.get_soffice_path(), Configuration.get_documents_directory(), solution_word_path)
+                    documents_list.append(solution_pdf_path)
 
         if Configuration.get_are_documents_included_to_zip():
-            self.export_to_zip()
+            self.export_to_zip(documents_list)
 
         print("Documenti generati correttamente!")
 
-    def export_to_zip(self) -> None:
+    def export_to_zip(self, documents_list) -> None:
         zip_filename = f"{Configuration.get_zip_filename()}.zip"
-        Utils.directory_to_zip(Configuration.get_documents_directory(), zip_filename)
+        Utils.documents_to_zip(Configuration.get_documents_directory(), documents_list, zip_filename)
 
 
 if __name__ == "__main__":

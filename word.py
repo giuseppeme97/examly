@@ -21,7 +21,10 @@ class Word():
         self.set_font()
         self.set_language()
         self.set_margin()
-        self.set_header()
+
+        if Configuration.get_is_header_included():
+            self.set_header()
+        
         self.set_title()
 
         if Configuration.get_is_subtitle_included():
