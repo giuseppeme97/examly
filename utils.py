@@ -9,8 +9,7 @@ import wx
 class Utils:
     @staticmethod
     def is_integer(value):
-        if isinstance(value, int):
-            return True
+        if isinstance(value, int): return True
         if isinstance(value, str):
             try:
                 int(value)
@@ -32,25 +31,21 @@ class Utils:
 
     @staticmethod
     def check_soffice(soffice_path) -> bool:
-        command = [soffice_path, "--headless",
-                   "--convert-to", "pdf", "--outdir", ".", ".docx"]
+        command = [soffice_path, "--headless","--convert-to", "pdf", "--outdir", ".", ".docx"]
 
         try:
             subprocess.run(command, check=True, capture_output=True, text=True)
             return True
-
         except:
             return False
 
     @staticmethod
     def export_to_pdf(soffice_path, destination_directory, file_path) -> bool:
-        command = [soffice_path, "--headless", "--convert-to",
-                   "pdf", "--outdir", destination_directory, file_path]
+        command = [soffice_path, "--headless", "--convert-to", "pdf", "--outdir", destination_directory, file_path]
 
         try:
             subprocess.run(command, check=True, capture_output=True, text=True)
             return True
-
         except:
             return False
 

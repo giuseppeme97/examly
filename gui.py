@@ -11,16 +11,35 @@ class ExamlyWorker(Thread):
         super(ExamlyWorker, self).__init__()
         self.functor = functor
         self.callback = callback
-
+        
     def run(self):
         self.functor()
         wx.CallAfter(self.callback, 0)
 
 
+class NonClosableDialog(wx.Dialog):
+    def __init__(self, parent, examly, title="Examly"):
+        super().__init__(parent, title=title, style=wx.CAPTION | wx.STAY_ON_TOP | wx.CENTER)
+        panel = wx.Panel(self)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        message = wx.StaticText(panel, label="Generazione dei documenti in corso...")
+        sizer.Add(message, 0, wx.ALL | wx.CENTER, 20)
+        panel.SetSizer(sizer)
+        sizer.Fit(panel)
+        self.Fit()
+        self.Centre()
+        
+    def process(self, examly):
+        try:
+            examly.write_exams()
+        except Exception:
+            print(Exception)
+        wx.CallAfter(self.EndModal, wx.ID_OK)
+
+
 class StyleOptionsWindow(wx.Dialog):
     def __init__(self, parent, title):
-        super(StyleOptionsWindow, self).__init__(
-            parent, title=title)
+        super(StyleOptionsWindow, self).__init__(parent, title=title)
         
         _, _, fonts, languages = Configuration.get_configs()
 
@@ -103,6 +122,7 @@ class MainWindow(wx.Frame):
         super(MainWindow, self).__init__(*args, **kw)
         self.init_params()
         self.init_ui()
+        self.worker_thread = None
         self.examly = Examly(console=self.printer)
 
     def init_params(self):
@@ -270,6 +290,7 @@ class MainWindow(wx.Frame):
         _, _, fonts, languages = Configuration.get_configs()
         dialog = StyleOptionsWindow(self, title="Opzioni di stile")
         if dialog.ShowModal() == wx.ID_OK:
+            print("Chiuso")
             Configuration.set_font(fonts[dialog.font_selection.GetSelection()])
             Configuration.set_language(languages[dialog.language_selection.GetSelection()])
             Configuration.set_title_size(dialog.title_size_input.GetValue())
@@ -295,9 +316,15 @@ class MainWindow(wx.Frame):
             getattr(Configuration, f"set_{key}")(
                 option["reference"].GetValue())
 
+        
+        # ---- #
         self.start_btn.Disable()
-        self.worker_thread = ExamlyWorker(self.run_examly, self.on_complete)
-        self.worker_thread.start()
+        dialog = NonClosableDialog(frame, self.examly)
+        worker_thread = Thread(target=lambda: dialog.process(self.examly))
+        worker_thread.start()
+        if dialog.ShowModal() == wx.ID_OK:
+            self.start_btn.Enable()
+            dialog.Destroy()
 
     def on_complete(self, *e):
         if not self.worker_thread.is_alive():

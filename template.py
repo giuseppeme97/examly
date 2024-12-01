@@ -34,3 +34,8 @@ class Template:
         except:
             return None
         
+
+def get_template():
+    template = Template()
+    return template.save()
+        

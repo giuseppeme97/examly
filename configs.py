@@ -18,10 +18,10 @@ class Configuration:
     default_option_denomination = "OPZIONE"
     default_include_accept_denomination = "SI"
     default_document_header = "Cognome e Nome: ________________________________________________________"
+    default_soffice_path = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
 
     # ------------------------------- #
     
-    soffice_path = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
     source_file = "/Users/giuseppe/Documents/examly/Domande.xlsx"
     documents_directory = "/Users/giuseppe/Documents/examly/output"
     images_directory = "/Users/giuseppe/Documents/examly/images"
@@ -67,11 +67,11 @@ class Configuration:
 
     @classmethod
     def set_soffice_path(cls, value):
-        cls.soffice_path = value
+        cls.default_soffice_path = value
 
     @classmethod
     def get_soffice_path(cls):
-        return cls.soffice_path
+        return cls.default_soffice_path
 
     @classmethod
     def set_source_file(cls, value):

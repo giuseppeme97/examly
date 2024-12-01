@@ -2,7 +2,7 @@ import random
 from pathlib import Path
 from word import Word
 from source import Source
-from template import Template
+from template import *
 from configs import Configuration
 from utils import Utils
 
@@ -13,7 +13,7 @@ class Examly():
         self.console: callable = console if console else print
         self.console("Istanza di Examly creata.")
         if not Utils.check_soffice(Configuration.get_soffice_path()):
-            self.console("Comando soffice non presente nell'ambiente di esecuzione.")
+            self.console("ATTENZIONE: Comando soffice non presente nell'ambiente di esecuzione.")
 
     def load_source(self) -> None:
         self.source = Source()
@@ -24,6 +24,7 @@ class Examly():
                 self.console("Indici domande:")
                 self.console(" ".join(map(str, questions_log)))
                 self.source_validated = False
+                return
 
             options_log = self.source.check_options_number()
             if len(options_log) > 0:
@@ -31,6 +32,7 @@ class Examly():
                 self.console("Indici domande:")
                 self.console(" ".join(map(str, options_log)))
                 self.source_validated = False
+                return
 
             orphans_log = self.source.check_orphan_questions()
             if len(orphans_log) > 0:
@@ -38,6 +40,7 @@ class Examly():
                 self.console("Indici domande:")
                 self.console(" ".join(map(str, orphans_log)))
                 self.source_validated = False
+                return
 
             solutions_log = self.source.check_solutions()
             if len(solutions_log) > 0:
@@ -86,8 +89,7 @@ class Examly():
         self.console = console
 
     def new_template(self) -> str:
-        template = Template()
-        template_path = template.save()
+        template_path = get_template()
         if template_path:
             self.console("Nuovo template generato correttamente.")
         else:
@@ -109,10 +111,8 @@ class Examly():
         return word.save()
 
     def write_exams(self) -> None:
-        Path(Configuration.get_documents_directory()).mkdir(
-            parents=True, exist_ok=True)
-        
-        self.console("Genero documenti...")
+        Path(Configuration.get_documents_directory()).mkdir(parents=True, exist_ok=True)
+        print("Genero documenti...")
 
         if Utils.is_integer(Configuration.get_exact_document_number()):
             documents_iterator = range(Configuration.get_exact_document_number(), Configuration.get_exact_document_number() + 1)
@@ -136,7 +136,7 @@ class Examly():
         if Configuration.get_are_documents_included_to_zip():
             self.export_to_zip()
 
-        self.console("Documenti generati correttamente!")
+        print("Documenti generati correttamente!")
 
     def export_to_zip(self) -> None:
         zip_filename = f"{Configuration.get_zip_filename()}.zip"
