@@ -98,6 +98,7 @@ class MainWindow(wx.Frame):
 
         # Checkbok filtri
         self.global_filters_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.left_sizer.Add(wx.StaticText(self.panel, label="Filtri:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.global_filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
 
         self.content_sizer.Add(self.left_sizer, 1, wx.ALL | wx.EXPAND, 10)
@@ -110,6 +111,8 @@ class MainWindow(wx.Frame):
         for option, properties in self.control_options.items():
             properties["reference"] = wx.CheckBox(self.panel, label=f"{properties['label']}")
             properties["reference"].SetValue(properties["default"])
+            if properties["disabled"]:
+                properties["reference"].Disable()
             self.right_sizer.Add(properties["reference"], 0, wx.ALL, 5)
 
         other_btn = wx.Button(self.panel, label="Opzioni di stile...")

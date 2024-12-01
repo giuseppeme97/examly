@@ -7,10 +7,7 @@ class Template:
     def __init__(self) -> None:
         self.workbook = openpyxl.Workbook()
         headers = [
-            f"{Configuration.get_subject_denomination()}", 
-            f"{Configuration.get_classroom_denomination()}",
-            f"{Configuration.get_period_denomination()}",
-            f"{Configuration.get_sector_denomination()}", 
+            f"FILTRO",
             f"{Configuration.get_include_denomination()}", 
             f"{Configuration.get_question_denomination()}", 
             f"{Configuration.get_image_denomination()}", 

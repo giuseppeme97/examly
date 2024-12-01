@@ -19,15 +19,14 @@ class Utils:
         return False
 
     @staticmethod
-    def save_json(documents_directory, session: dict) -> None:
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open(f"{documents_directory}/{now}.json", "w") as file:
-            json.dump(session, file, indent=4)
+    def save_raw(documents_directory: str, document_filename: dict, raw: dict) -> None:
+        with open(f"{documents_directory}/{document_filename}.json", "w") as file:
+            json.dump(raw, file, indent=4)
 
-    @staticmethod
-    def load_json(session_file) -> dict:
-        with open(session_file, "r") as file:
-            return json.load(file)
+    # @staticmethod
+    # def load_json(session_file) -> dict:
+    #     with open(session_file, "r") as file:
+    #         return json.load(file)
 
     @staticmethod
     def check_soffice(soffice_path) -> bool:

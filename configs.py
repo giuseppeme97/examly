@@ -42,10 +42,11 @@ class Configuration:
     are_questions_shuffled = True
     are_options_shuffled = True
     are_solutions_exported = False
+    are_raw_exported = False       
     are_questions_single_included = False
     are_documents_exported_to_pdf = True
     are_documents_included_to_zip = True
-    exact_document_number = None
+    exact_document_number = None    # not GUI
     font = default_fonts_list[0]
     language  = default_languages_list[0]
     title_size = 15
@@ -239,6 +240,14 @@ class Configuration:
     @classmethod
     def get_are_solutions_exported(cls):
         return cls.are_solutions_exported
+    
+    @classmethod
+    def set_are_raw_exported(cls, value):
+        cls.are_raw_exported = value
+
+    @classmethod
+    def get_are_raw_exported(cls):
+        return cls.are_raw_exported
 
     @classmethod
     def set_are_questions_single_included(cls, value):
@@ -414,57 +423,74 @@ class Configuration:
             Configuration.get_is_header_included.__name__.removeprefix("get_"): {
                 "label": "Inserisci cognome nome",
                 "reference": None,
-                "default": Configuration.get_is_header_included()
+                "default": Configuration.get_is_header_included(),
+                "disabled": False
             },
             Configuration.get_is_subtitle_included.__name__.removeprefix("get_"): {
                 "label": "Inserisci sottotitolo",
                 "reference": None,
-                "default": Configuration.get_is_subtitle_included()
+                "default": Configuration.get_is_subtitle_included(),
+                "disabled": False
             },
             Configuration.get_are_pages_numbered.__name__.removeprefix("get_"): {
                 "label": "Inserisci numero di pagina",
                 "reference": None,
-                "default": Configuration.get_are_pages_numbered()
+                "default": Configuration.get_are_pages_numbered(),
+                "disabled": False
             },
             Configuration.get_are_documents_numbered.__name__.removeprefix("get_"): {
                 "label": "Numera documenti",
                 "reference": None,
-                "default": Configuration.get_are_documents_numbered()
+                "default": Configuration.get_are_documents_numbered(),
+                "disabled": False
             },
             Configuration.get_are_questions_numbered.__name__.removeprefix("get_"): {
                 "label": "Numera domande",
                 "reference": None,
-                "default": Configuration.get_are_questions_numbered()
+                "default": Configuration.get_are_questions_numbered(),
+                "disabled": False
             },
             Configuration.get_are_questions_shuffled.__name__.removeprefix("get_"): {
                 "label": "Mescola domande",
                 "reference": None,
-                "default": Configuration.get_are_questions_shuffled()
+                "default": Configuration.get_are_questions_shuffled(),
+                "disabled": False
             },
             Configuration.get_are_options_shuffled.__name__.removeprefix("get_"): {
                 "label": "Mescola risposte",
                 "reference": None,
-                "default": Configuration.get_are_options_shuffled()
-            },
-            Configuration.get_are_solutions_exported.__name__.removeprefix("get_"): {
-                "label": "Esporta soluzioni",
-                "reference": None,
-                "default": Configuration.get_are_solutions_exported()
+                "default": Configuration.get_are_options_shuffled(),
+                "disabled": False
             },
             Configuration.get_are_questions_single_included.__name__.removeprefix("get_"): {
                 "label": "Includi domande singolarmente",
                 "reference": None,
-                "default": Configuration.get_are_questions_single_included()
+                "default": Configuration.get_are_questions_single_included(),
+                "disabled": False
+            },
+            Configuration.get_are_solutions_exported.__name__.removeprefix("get_"): {
+                "label": "Esporta soluzioni",
+                "reference": None,
+                "default": Configuration.get_are_solutions_exported(),
+                "disabled": False
+            },
+            Configuration.get_are_raw_exported.__name__.removeprefix("get_"): {
+                "label": "Esporta RAW",
+                "reference": None,
+                "default": Configuration.get_are_raw_exported(),
+                "disabled": False
             },
             Configuration.get_are_documents_exported_to_pdf.__name__.removeprefix("get_"): {
                 "label": "Esporta in PDF",
                 "reference": None,
-                "default": Configuration.get_are_documents_exported_to_pdf()
+                "default": Configuration.get_are_documents_exported_to_pdf(),
+                "disabled": False
             },
             Configuration.get_are_documents_included_to_zip.__name__.removeprefix("get_"): {
                 "label": "Esporta in ZIP",
                 "reference": None,
-                "default": Configuration.get_are_documents_included_to_zip()
+                "default": Configuration.get_are_documents_included_to_zip(),
+                "disabled": False
             }
         }
 

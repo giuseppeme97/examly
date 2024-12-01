@@ -114,6 +114,14 @@ class Examly():
         for document_number in documents_iterator:
             questions, _ = self.source.get_questions()
             sampled_questions = self.sample_questions(questions)
+            
+            if Configuration.get_are_raw_exported():
+                raw = {
+                    "document": f"{Configuration.get_document_filename()}_{document_number}",
+                    "content": sampled_questions
+                }
+                Utils.save_raw(Configuration.get_documents_directory(), f"{Configuration.get_document_filename()}_{document_number}", raw)
+            
             document_word_path = self.write_exam(sampled_questions, document_number, is_solution=False)
             documents_list.append(document_word_path)
 
