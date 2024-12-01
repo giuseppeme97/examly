@@ -89,6 +89,13 @@ class MainWindow(wx.Frame):
         self.left_sizer.Add(wx.StaticText(self.panel, label="Numero di documenti:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.documents_number_input, 0, wx.ALL | wx.EXPAND, 5)
 
+        # Inserimento start_number
+        self.start_number_input = wx.TextCtrl(self.panel, style=wx.TE_PROCESS_ENTER, value=str(Configuration.get_start_number()))
+        self.start_number_input.SetHint("Inserire numero di inizio...")
+        self.start_number_input.Bind(wx.EVT_CHAR, Utils.only_integer)
+        self.left_sizer.Add(wx.StaticText(self.panel, label="Numero di inizio:"), 0, wx.ALL | wx.EXPAND, 5)
+        self.left_sizer.Add(self.start_number_input, 0, wx.ALL | wx.EXPAND, 5)
+
         # Inserimento questions_number
         self.questions_number_input = wx.TextCtrl(self.panel, style=wx.TE_PROCESS_ENTER, value=str(Configuration.get_questions_number()))
         self.questions_number_input.SetHint("Inserire numero di domande...")
@@ -197,6 +204,7 @@ class MainWindow(wx.Frame):
         Configuration.set_document_filename(self.document_filename_input.GetValue())
         Configuration.set_zip_filename(self.zip_filename_input.GetValue())
         Configuration.set_documents_number(int(self.documents_number_input.GetValue()))
+        Configuration.set_start_number(int(self.start_number_input.GetValue()))
         Configuration.set_questions_number(int(self.questions_number_input.GetValue()))
         Configuration.set_document_title(self.document_title_input.GetValue())
 

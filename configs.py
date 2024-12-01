@@ -32,7 +32,8 @@ class Configuration:
     }
     document_title = "Prova comune di Informatica - A.S. 2024/2025 - Classi 3F 3G 3H 3I"
     document_subtitle = "Segnare solo una delle quattro opzioni per ciascuna domanda."
-    documents_number = 2
+    documents_number = 1
+    start_number = 6
     questions_number = 20
     is_header_included = True
     is_subtitle_included = False
@@ -44,9 +45,9 @@ class Configuration:
     are_solutions_exported = False
     are_raw_exported = False       
     are_questions_single_included = False
-    are_documents_exported_to_pdf = True
-    are_documents_included_to_zip = True
-    exact_document_number = None    # not GUI
+    are_documents_exported_to_pdf = False
+    are_documents_included_to_zip = False
+    exact_document_number = None    
     font = default_fonts_list[0]
     language  = default_languages_list[0]
     title_size = 15
@@ -168,6 +169,14 @@ class Configuration:
     @classmethod
     def get_documents_number(cls):
         return cls.documents_number
+    
+    @classmethod
+    def set_start_number(cls, value):
+        cls.start_number = value
+
+    @classmethod
+    def get_start_number(cls):
+        return cls.start_number
 
     @classmethod
     def set_questions_number(cls, value):
