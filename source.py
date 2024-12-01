@@ -5,7 +5,9 @@ from configs import Configuration
 class Source:
     def __init__(self) -> None:
         self.loaded = False
+        self.filters = {}
         self.load()
+        self.set_filters()
 
 
     def is_loaded(self) -> bool:
@@ -28,20 +30,15 @@ class Source:
             self.loaded = False
 
 
-    def get_subjects(self) -> list[str]:
-        return sorted(pd.Series(self.df[Configuration.get_subject_denomination()].unique()).dropna().tolist()) 
+    def set_filters(self) -> None:
+        index_target = self.df.columns.get_loc(Configuration.get_include_denomination())            
+        filter_keys = self.df.columns[:index_target].tolist()
+        for filter_key in filter_keys:
+            self.filters[filter_key] = sorted(pd.Series(self.df[filter_key].unique()).dropna().tolist())
 
-
-    def get_classrooms(self) -> list[int]:
-        return sorted(list(map(int, pd.Series(self.df[Configuration.get_classroom_denomination()].unique()).dropna().tolist())))
     
-
-    def get_sectors(self) -> list[str]:
-        return sorted(pd.Series(self.df[Configuration.get_sector_denomination()].unique()).dropna().tolist())
-    
-
-    def get_periods(self) -> list[str]:
-        return sorted(pd.Series(self.df[Configuration.get_period_denomination()].unique()).dropna().tolist())
+    def get_filters(self) -> list[str]:
+        return self.filters
 
 
     def get_rows(self) -> int:
@@ -102,23 +99,21 @@ class Source:
     def check_orphan_questions(self) -> list[int]:
         logs = []
         for i, row in self.df.iterrows():
-            if pd.isna(row[Configuration.get_subject_denomination()]) or pd.isna(row[Configuration.get_classroom_denomination()]) or pd.isna(row[Configuration.get_period_denomination()]) or pd.isna(row[Configuration.get_sector_denomination()]):
+            if any([pd.isna(row[filter]) for filter in self.filters]):
                 logs.append(i + 2)
+        
         return logs 
     
 
     def check_row(self, row: object) -> bool:
-        base = (
-            ((row[Configuration.get_subject_denomination()] in Configuration.get_subjects()) if len(Configuration.get_subjects()) > 0 else True) and
-            ((int(row[Configuration.get_classroom_denomination()]) in Configuration.get_classrooms()) if len(Configuration.get_classrooms()) > 0 else True) and
-            ((row[Configuration.get_sector_denomination()] in Configuration.get_sectors()) if(len(Configuration.get_sectors())) > 0 else True) and
-            ((int(row[Configuration.get_period_denomination()]) in Configuration.get_periods()) if(len(Configuration.get_periods())) > 0 else True)
-        )
+        base = []
+        for filter in self.filters:
+            base.append(((row[filter] in Configuration.get_filter_values(filter)) if len(Configuration.get_filter_values(filter)) > 0 else True))
 
         if Configuration.get_are_questions_single_included():
-            return base and (row[Configuration.get_include_denomination()] == Configuration.get_include_accept_denomination())
+            return all(base) and (row[Configuration.get_include_denomination()] == Configuration.get_include_accept_denomination())
         else:
-            return base
+            return all(base)
         
 
     def get_image_path(self, row: object) -> str:

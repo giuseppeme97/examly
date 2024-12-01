@@ -7,10 +7,6 @@ class Configuration:
     default_excel_formats_supported = [".xlsx", ".xls"]
     default_table_formats_supported = [".csv"]
     default_template_filename = "template.xlsx"
-    default_subject_denomination = "MATERIA"
-    default_classroom_denomination = "CLASSE"
-    default_period_denomination = "PERIODO"
-    default_sector_denomination = "SETTORE"
     default_include_denomination = "INCLUDERE"
     default_question_denomination = "DOMANDA"
     default_image_denomination = "IMMAGINE"
@@ -28,10 +24,12 @@ class Configuration:
     template_directory = "/Users/giuseppe/Documents/examly/template"
     document_filename = "esame"
     zip_filename = "compito"
-    subjects = ["INFORMATICA"]
-    classrooms = [4]
-    periods = [1]
-    sectors = []
+    filters = {
+        "MATERIA": ["SISTEMI E RETI"],
+        "CLASSE": [3], 
+        "PERIODO": [1], 
+        "SETTORE": []
+    }
     document_title = "Prova comune di Informatica - A.S. 2024/2025 - Classi 3F 3G 3H 3I"
     document_subtitle = "Segnare solo una delle quattro opzioni per ciascuna domanda."
     documents_number = 2
@@ -130,36 +128,12 @@ class Configuration:
         return cls.zip_filename
     
     @classmethod
-    def set_subjects(cls, value):
-        cls.subjects = value
+    def set_filter_values(cls, filter, values):
+        cls.filters[filter] = values
 
     @classmethod
-    def get_subjects(cls):
-        return cls.subjects
-
-    @classmethod
-    def set_classrooms(cls, value):
-        cls.classrooms = [int(classroom) for classroom in value]
-
-    @classmethod
-    def get_classrooms(cls):
-        return cls.classrooms
-
-    @classmethod
-    def set_periods(cls, value):
-        cls.periods = [int(period) for period in value]
-
-    @classmethod
-    def get_periods(cls):
-        return cls.periods
-
-    @classmethod
-    def set_sectors(cls, value):
-        cls.sectors = value
-
-    @classmethod
-    def get_sectors(cls):
-        return cls.sectors
+    def get_filter_values(cls, filter):
+        return cls.filters[filter]
 
     @classmethod
     def set_document_title(cls, value):
@@ -306,39 +280,6 @@ class Configuration:
         return cls.default_table_formats_supported
 
     @classmethod
-    def set_subject_denomination(cls, value):
-        cls.default_subject_denomination = value
-
-    @classmethod
-    def get_subject_denomination(cls):
-        return cls.default_subject_denomination
-    
-    @classmethod
-    def set_classroom_denomination(cls, value):
-        cls.default_classroom_denomination = value
-
-    @classmethod
-    def get_classroom_denomination(cls):
-        return cls.default_classroom_denomination
-
-    # period_denomination
-    @classmethod
-    def set_period_denomination(cls, value):
-        cls.default_period_denomination = value
-
-    @classmethod
-    def get_period_denomination(cls):
-        return cls.default_period_denomination
-
-    @classmethod
-    def set_sector_denomination(cls, value):
-        cls.default_sector_denomination = value
-
-    @classmethod
-    def get_sector_denomination(cls):
-        return cls.default_sector_denomination
-
-    @classmethod
     def set_include_denomination(cls, value):
         cls.default_include_denomination = value
 
@@ -459,27 +400,8 @@ class Configuration:
         return cls.right_margin
     
     @classmethod
-    def get_configs(cls):
-        filters = {
-            "subjects": {
-                "label": "Materie:",
-                "items": []
-            },
-            "classrooms": {
-                "label": "Classi:",
-                "items": []
-            },
-            "periods": {
-                "label": "Periodi:",
-                "items": []
-            },
-            "sectors": {
-                "label": "Settori:",
-                "items": []
-            },
-        }
-
-        control_options = {
+    def get_control_options(cls):
+        return {
             Configuration.get_is_subtitle_included.__name__.removeprefix("get_"): {
                 "label": "Inserisci sottotitolo",
                 "reference": None,
@@ -532,7 +454,9 @@ class Configuration:
             }
         }
 
-        return filters, control_options, cls.default_fonts_list, cls.default_languages_list
+    @classmethod
+    def get_selection_lists(cls):
+        return cls.default_fonts_list, cls.default_languages_list
 
     @classmethod
     def export_config(cls, file_path):

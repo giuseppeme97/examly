@@ -41,7 +41,7 @@ class StyleOptionsWindow(wx.Dialog):
     def __init__(self, parent, title):
         super(StyleOptionsWindow, self).__init__(parent, title=title)
         
-        _, _, fonts, languages = Configuration.get_configs()
+        fonts, languages = Configuration.get_selection_lists()
 
         panel = wx.Panel(self)
         main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -120,13 +120,13 @@ class StyleOptionsWindow(wx.Dialog):
 class MainWindow(wx.Frame):
     def __init__(self, *args, **kw):
         super(MainWindow, self).__init__(*args, **kw)
-        self.init_params()
+        self.init_control_options()
         self.init_ui()
         self.worker_thread = None
         self.examly = Examly(console=self.printer)
 
-    def init_params(self):
-        self.filters, self.control_options, _, _ = Configuration.get_configs()
+    def init_control_options(self):
+        self.control_options = Configuration.get_control_options()
 
     def init_ui(self):
         # Pannello principale
@@ -218,10 +218,10 @@ class MainWindow(wx.Frame):
         # Checkbox opzioni
         self.right_sizer.Add(wx.StaticText(self.panel, label="Opzioni di controllo:"), 0, wx.ALL | wx.EXPAND, 5)
         
-        for _, option in self.control_options.items():
-            option["reference"] = wx.CheckBox(self.panel, label=f"{option['label']}")
-            option["reference"].SetValue(option["default"])
-            self.right_sizer.Add(option["reference"], 0, wx.ALL, 5)
+        for option, properties in self.control_options.items():
+            properties["reference"] = wx.CheckBox(self.panel, label=f"{properties['label']}")
+            properties["reference"].SetValue(properties["default"])
+            self.right_sizer.Add(properties["reference"], 0, wx.ALL, 5)
 
         other_btn = wx.Button(self.panel, label="Opzioni di stile...")
         other_btn.Bind(wx.EVT_BUTTON, self.on_open_style_options)
@@ -287,7 +287,7 @@ class MainWindow(wx.Frame):
             self.printer(f"Template salvato in: {template_directory}")
 
     def on_open_style_options(self, e):
-        _, _, fonts, languages = Configuration.get_configs()
+        fonts, languages = Configuration.get_selection_lists()
         dialog = StyleOptionsWindow(self, title="Opzioni di stile")
         if dialog.ShowModal() == wx.ID_OK:
             print("Chiuso")
@@ -308,16 +308,12 @@ class MainWindow(wx.Frame):
         Configuration.set_questions_number(int(self.questions_number_input.GetValue()))
         Configuration.set_document_title(self.document_title_input.GetValue())
 
-        for key in self.filters:
-            getattr(Configuration, f"set_{key}")(
-                [item["name"] for item in self.filters[key]["items"] if item["reference"].GetValue()])
+        for filter, filter_items in self.checkboxes_filters.items():
+            Configuration.set_filter_values(filter, [item["name"] for item in filter_items if item["reference"].GetValue()])
 
-        for key, option in self.control_options.items():
-            getattr(Configuration, f"set_{key}")(
-                option["reference"].GetValue())
-
+        for option, properties in self.control_options.items():
+            getattr(Configuration, f"set_{option}")(properties["reference"].GetValue())
         
-        # ---- #
         self.start_btn.Disable()
         dialog = NonClosableDialog(frame, self.examly)
         worker_thread = Thread(target=lambda: dialog.process(self.examly))
@@ -344,23 +340,25 @@ class MainWindow(wx.Frame):
 
     def refresh_filters(self):
         self.global_filters_sizer.Clear(True)
-
-        for key in self.filters:
-            self.filters[key]["items"] = []
-            for item in getattr(self.examly, f"get_{key}")():
-                self.filters[key]["items"].append({
-                    "name": item,
-                    "label": item,
+        self.filters = self.examly.get_filters()
+        self.checkboxes_filters = {}
+        
+        for filter, filter_items in self.filters.items():
+            self.checkboxes_filters[filter] = []
+            for value in filter_items:
+                self.checkboxes_filters[filter].append({
+                    "name": value,
+                    "label": value,
                     "reference": None
                 })
 
-        for _, filter_item in self.filters.items():
+        for filter, filter_items in self.checkboxes_filters.items():
             filters_sizer = wx.BoxSizer(wx.VERTICAL)
-            filter_label = wx.StaticText(self.panel, label=f"{filter_item['label']}")
+            filter_label = wx.StaticText(self.panel, label=f"{filter}:")
             filters_sizer.Add(filter_label, 0, wx.TOP | wx.LEFT, 5)
-            for element in filter_item["items"]:
-                element["reference"] = wx.CheckBox(self.panel, label=str(element["label"]))
-                filters_sizer.Add(element["reference"], 0, wx.ALL, 5)
+            for item in filter_items:
+                item["reference"] = wx.CheckBox(self.panel, label=str(item["label"]))
+                filters_sizer.Add(item["reference"], 0, wx.ALL, 5)
             self.global_filters_sizer.Add(filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
         self.global_filters_sizer.Layout()
 

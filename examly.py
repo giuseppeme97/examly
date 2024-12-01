@@ -36,7 +36,7 @@ class Examly():
 
             orphans_log = self.source.check_orphan_questions()
             if len(orphans_log) > 0:
-                self.console("\nERRORE: Alcune domande presenti nella sorgente non hanno alcune categorie assegnate.")
+                self.console("\nERRORE: Alcune domande presenti nella sorgente non hanno alcuni filtri assegnati.")
                 self.console("Indici domande:")
                 self.console(" ".join(map(str, orphans_log)))
                 self.source_validated = False
@@ -63,18 +63,9 @@ class Examly():
 
     def is_source_validated(self) -> bool:
         return self.source_validated
-
-    def get_subjects(self) -> list[str]:
-        return self.source.get_subjects()
-
-    def get_classrooms(self) -> list[int]:
-        return self.source.get_classrooms()
-
-    def get_sectors(self) -> list[str]:
-        return self.source.get_sectors()
-
-    def get_periods(self) -> list[str]:
-        return self.source.get_periods()
+    
+    def get_filters(self) -> dict:
+        return self.source.get_filters()
 
     def get_rows(self) -> int:
         return self.source.get_rows()
