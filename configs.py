@@ -1,8 +1,13 @@
 import json
+import wx
 
 class Configuration:
+    app = wx.App(False)
+    font_enum = wx.FontEnumerator()
+    font_enum.EnumerateFacenames()
+
     default_app_name = "Examly"
-    default_fonts_list = ["Liberation Sans", "Arial", "Courier", "Times New Roman"]
+    default_fonts_list = ["Liberarion Sans", "Liberation Serif", "---", *font_enum.GetFacenames()]
     default_languages_list = ["it-IT", "en-EN"]
     default_excel_formats_supported = [".xlsx", ".xls"]
     default_table_formats_supported = [".csv"]

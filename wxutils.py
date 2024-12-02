@@ -56,14 +56,14 @@ class StyleOptionsWindow(wx.Dialog):
         # Selection per "font"
         grid_sizer.Add(wx.StaticText(panel, label="Font:"), 0, wx.ALIGN_CENTER_VERTICAL)
         self.font_selection = wx.Choice(panel, choices=fonts)
-        self.font_selection.SetSelection(0)
+        self.font_selection.SetSelection(fonts.index(Configuration.get_font()))
         grid_sizer.Add(self.font_selection, 1, wx.EXPAND)
 
         # Selection per "linguaggio"
-        grid_sizer.Add(wx.StaticText(panel, label="Linguaggio:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.language_selection = wx.Choice(panel, choices=languages)
-        self.language_selection.SetSelection(0)
-        grid_sizer.Add(self.language_selection, 1, wx.EXPAND)
+        # grid_sizer.Add(wx.StaticText(panel, label="Linguaggio:"), 0, wx.ALIGN_CENTER_VERTICAL)
+        # self.language_selection = wx.Choice(panel, choices=languages)
+        # self.language_selection.SetSelection(0)
+        # grid_sizer.Add(self.language_selection, 1, wx.EXPAND)
 
         # Text control per "dimensione titolo"
         grid_sizer.Add(wx.StaticText(panel, label="Dimensione titolo:"), 0, wx.ALIGN_CENTER_VERTICAL)

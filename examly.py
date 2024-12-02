@@ -106,11 +106,6 @@ class Examly():
         documents_list = []
         print("Genero documenti...")
 
-        # if Utils.is_integer(Configuration.get_exact_document_number()):
-        #     documents_iterator = range(Configuration.get_exact_document_number(), Configuration.get_exact_document_number() + 1)
-        # else:
-        #     documents_iterator = range(1, Configuration.get_documents_number() + 1)
-
         for document_number in range(Configuration.get_start_number(), Configuration.get_start_number() + Configuration.get_documents_number()):
             questions, _ = self.source.get_questions()
             sampled_questions = self.sample_questions(questions)

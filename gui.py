@@ -191,7 +191,7 @@ class MainWindow(wx.Frame):
         if dialog.ShowModal() == wx.ID_OK:
             print("Chiuso")
             Configuration.set_font(fonts[dialog.font_selection.GetSelection()])
-            Configuration.set_language(languages[dialog.language_selection.GetSelection()])
+            # Configuration.set_language(languages[dialog.language_selection.GetSelection()])
             Configuration.set_title_size(dialog.title_size_input.GetValue())
             Configuration.set_questions_size(dialog.questions_size_input.GetValue())
             Configuration.set_images_size(dialog.images_size_input.GetValue())
