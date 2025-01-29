@@ -1,14 +1,10 @@
 import json
-import wx
 
 class Configuration:
-    app = wx.App(False)
-    font_enum = wx.FontEnumerator()
-    font_enum.EnumerateFacenames()
-
     default_app_name = "Examly"
-    default_fonts_list = ["Liberation Sans", "Liberation Serif", "---", *font_enum.GetFacenames()]
+    gui_mode = False
     default_languages_list = ["it-IT", "en-EN"]
+    default_fonts_list = ["Liberation Sans", "Liberation Serif", "---"]
     default_excel_formats_supported = [".xlsx", ".xls"]
     default_table_formats_supported = [".csv"]
     default_template_filename = "template.xlsx"
@@ -35,11 +31,11 @@ class Configuration:
         "PERIODO": [], 
         "SETTORE": []
     }
-    document_title = "Verifica scritta di Sistemi e Reti - A.S. 2024/2025 - Classe 5F"
+    document_title = "Verifica scritta di Sistemi e Reti - A.S. 2024/2025 - Classe 4F"
     document_subtitle = "Segnare solo una delle quattro opzioni per ciascuna domanda."
-    documents_number = 3
+    documents_number = 2
     start_number = 1
-    questions_number = 50
+    questions_number = 20
     is_header_included = True
     is_subtitle_included = True
     are_pages_numbered = True
@@ -70,6 +66,20 @@ class Configuration:
     @classmethod
     def get_app_name(cls):
         return cls.default_app_name
+    
+    @classmethod
+    def set_gui_mode(cls, value):
+        cls.gui_mode = value
+        if cls.gui_mode:
+            import wx
+            _ = wx.App(False)
+            font_enum = wx.FontEnumerator()
+            font_enum.EnumerateFacenames()
+            cls.default_fonts_list = [*cls.default_fonts_list, *font_enum.GetFacenames()]
+
+    @classmethod
+    def get_gui_mode(cls):
+        return cls.gui_mode
 
     @classmethod
     def set_soffice_path(cls, value):

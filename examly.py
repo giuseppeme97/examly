@@ -97,8 +97,8 @@ class Examly():
 
         return questions[0: Configuration.get_questions_number()]
     
-    # def get_questions_number(self):
-    #     pass
+    def get_questions_cardinality(self) -> int:
+        return len(self.source.get_questions())
 
     def write_exam(self, questions: list[dict], document_number: int, is_solution: bool) -> str:
         word = Word(questions, document_number, is_solution)
@@ -110,13 +110,7 @@ class Examly():
         print("Genero documenti...")
 
         for document_number in range(Configuration.get_start_number(), Configuration.get_start_number() + Configuration.get_documents_number()):
-            questions, len_questions = self.source.get_questions()
-
-            if only_len:
-                print(len_questions)
-                return
-
-            sampled_questions = self.sample_questions(questions)
+            sampled_questions = self.sample_questions(self.source.get_questions())
             
             if Configuration.get_are_raw_exported():
                 raw = {
@@ -155,4 +149,4 @@ if __name__ == "__main__":
     examly.load_source()
 
     if examly.is_source_validated():
-        examly.write_exams()
+        print(examly.get_questions_cardinality())

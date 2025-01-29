@@ -1,10 +1,7 @@
-from datetime import datetime
 import json
 import subprocess
 import zipfile
 import os
-import wx
-
 
 class Utils:
     @staticmethod
@@ -61,6 +58,7 @@ class Utils:
 
     @staticmethod
     def only_integer(event):
+        import wx
         key_code = event.GetKeyCode()
         if not (ord('0') <= key_code <= ord('9')) and key_code != wx.WXK_BACK:
             return

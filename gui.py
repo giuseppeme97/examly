@@ -9,6 +9,7 @@ from wxutils import LoadingWindow, StyleOptionsWindow
 class MainWindow(wx.Frame):
     def __init__(self, *args, **kw):
         super(MainWindow, self).__init__(*args, **kw)
+        Configuration.set_gui_mode(True)
         self.init_control_options()
         self.init_ui()
         self.worker_thread = None

@@ -66,8 +66,7 @@ class Source:
 
         for _, row in self.df.iterrows():
             if not pd.isna(row[Configuration.get_image_denomination()]):
-                image_path = f"{Configuration.get_images_directory(
-                )}/{str(row[Configuration.get_image_denomination()])}"
+                image_path = f"{Configuration.get_images_directory()}/{str(row[Configuration.get_image_denomination()])}"
                 if os.path.isfile(image_path):
                     founded_images.append(image_path)
                 else:
@@ -112,14 +111,13 @@ class Source:
             return all(base)
 
     def get_image_path(self, row: object) -> str:
-        image_path = f"{Configuration.get_images_directory(
-        )}/{str(row[Configuration.get_image_denomination()])}"
+        image_path = f"{Configuration.get_images_directory()}/{str(row[Configuration.get_image_denomination()])}"
         if not pd.isna(row[Configuration.get_image_denomination()]) and os.path.isfile(image_path):
             return image_path
         else:
             return None
 
-    def get_questions(self) -> tuple[list[dict], int]:
+    def get_questions(self) -> list[dict]:
         questions = []
 
         for _, row in self.df.iterrows():
@@ -138,4 +136,4 @@ class Source:
                     i = i + 1
 
                 questions.append(question)
-        return (questions, len(questions))
+        return questions
