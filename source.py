@@ -7,7 +7,8 @@ class Source:
     def __init__(self) -> None:
         self.loaded = False
         self.load()
-        self.set_filters()
+        if self.loaded:
+            self.set_filters()
 
     def is_loaded(self) -> bool:
         return self.loaded
@@ -22,6 +23,7 @@ class Source:
             reader = pd.read_csv
 
         try:
+            print(Configuration.get_source_file())
             self.df = reader(Configuration.get_source_file())
             self.loaded = True
         except:

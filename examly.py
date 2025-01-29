@@ -96,18 +96,26 @@ class Examly():
                 random.shuffle(question['options'])
 
         return questions[0: Configuration.get_questions_number()]
+    
+    # def get_questions_number(self):
+    #     pass
 
     def write_exam(self, questions: list[dict], document_number: int, is_solution: bool) -> str:
         word = Word(questions, document_number, is_solution)
         return word.save()
 
-    def write_exams(self) -> None:
+    def write_exams(self, only_len=False) -> None:
         Path(Configuration.get_documents_directory()).mkdir(parents=True, exist_ok=True)
         documents_list = []
         print("Genero documenti...")
 
         for document_number in range(Configuration.get_start_number(), Configuration.get_start_number() + Configuration.get_documents_number()):
-            questions, _ = self.source.get_questions()
+            questions, len_questions = self.source.get_questions()
+
+            if only_len:
+                print(len_questions)
+                return
+
             sampled_questions = self.sample_questions(questions)
             
             if Configuration.get_are_raw_exported():

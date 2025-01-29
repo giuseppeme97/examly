@@ -7,7 +7,7 @@ class Configuration:
     font_enum.EnumerateFacenames()
 
     default_app_name = "Examly"
-    default_fonts_list = ["Liberarion Sans", "Liberation Serif", "---", *font_enum.GetFacenames()]
+    default_fonts_list = ["Liberation Sans", "Liberation Serif", "---", *font_enum.GetFacenames()]
     default_languages_list = ["it-IT", "en-EN"]
     default_excel_formats_supported = [".xlsx", ".xls"]
     default_table_formats_supported = [".csv"]
@@ -31,25 +31,25 @@ class Configuration:
     zip_filename = "compito"
     filters = {
         "MATERIA": ["SISTEMI E RETI"],
-        "CLASSE": [3], 
-        "PERIODO": [1], 
+        "CLASSE": [4], 
+        "PERIODO": [], 
         "SETTORE": []
     }
-    document_title = "Prova comune di Informatica - A.S. 2024/2025 - Classi 3F 3G 3H 3I"
+    document_title = "Verifica scritta di Sistemi e Reti - A.S. 2024/2025 - Classe 5F"
     document_subtitle = "Segnare solo una delle quattro opzioni per ciascuna domanda."
-    documents_number = 1
-    start_number = 6
-    questions_number = 20
+    documents_number = 3
+    start_number = 1
+    questions_number = 50
     is_header_included = True
-    is_subtitle_included = False
+    is_subtitle_included = True
     are_pages_numbered = True
     are_documents_numbered = True
     are_questions_numbered = True
     are_questions_shuffled = True
     are_options_shuffled = True
-    are_solutions_exported = False
+    are_solutions_exported = True
     are_raw_exported = False       
-    are_questions_single_included = False
+    are_questions_single_included = True
     are_documents_exported_to_pdf = False
     are_documents_included_to_zip = False
     exact_document_number = None    
