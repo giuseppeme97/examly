@@ -48,12 +48,13 @@ class Examly():
                 self.console("Indici domande:")
                 self.console(" ".join(map(str, solutions_log)))
 
-            if Configuration.get_images_directory():
-                images_log = self.source.check_images()
-                if len(images_log["file_mancanti"]) > 0:
-                    self.console("\nATTENZIONE: Alcune immagini presenti nella sorgente non sono state trovate.")
-                    self.console("Immagini non trovate:")
-                    self.console(" ".join(map(str, images_log["file_mancanti"])))
+            if Configuration.get_are_images_inserted():
+                if Configuration.get_images_directory():
+                    images_log = self.source.check_images()
+                    if len(images_log["file_mancanti"]) > 0:
+                        self.console("\nATTENZIONE: Alcune immagini presenti nella sorgente non sono state trovate.")
+                        self.console("Immagini non trovate:")
+                        self.console(" ".join(map(str, images_log["file_mancanti"])))
 
             self.console("Sorgente caricata correttamente.")
             self.source_validated = True

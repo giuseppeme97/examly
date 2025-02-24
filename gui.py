@@ -9,7 +9,6 @@ from wxutils import LoadingWindow, StyleOptionsWindow
 class MainWindow(wx.Frame):
     def __init__(self, *args, **kw):
         super(MainWindow, self).__init__(*args, **kw)
-        Configuration.set_gui_mode(True)
         self.init_control_options()
         self.init_ui()
         self.worker_thread = None
@@ -108,14 +107,16 @@ class MainWindow(wx.Frame):
         self.global_filters_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.left_sizer.Add(wx.StaticText(self.panel, label="Filtri:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.global_filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
+        self.filtered_questions_label = wx.StaticText(self.panel, label="Domande selezionate: 0")
+        self.left_sizer.Add(self.filtered_questions_label, 0, wx.ALL | wx.EXPAND, 5)
 
+        # Aggiunta della sezione sinistra
         self.content_sizer.Add(self.left_sizer, 1, wx.ALL | wx.EXPAND, 10)
         self.right_sizer = wx.BoxSizer(wx.VERTICAL)
         self.right_sizer.AddStretchSpacer()
 
         # Checkbox opzioni
         self.right_sizer.Add(wx.StaticText(self.panel, label="Opzioni di controllo:"), 0, wx.ALL | wx.EXPAND, 5)
-        
         for option, properties in self.control_options.items():
             properties["reference"] = wx.CheckBox(self.panel, label=f"{properties['label']}")
             properties["reference"].SetValue(properties["default"])
@@ -123,6 +124,7 @@ class MainWindow(wx.Frame):
                 properties["reference"].Disable()
             self.right_sizer.Add(properties["reference"], 0, wx.ALL, 5)
 
+        # Opzioni di stile
         other_btn = wx.Button(self.panel, label="Opzioni di stile...")
         other_btn.Bind(wx.EVT_BUTTON, self.on_open_style_options)
         self.right_sizer.AddStretchSpacer()
@@ -186,11 +188,17 @@ class MainWindow(wx.Frame):
             self.examly.new_template()
             self.printer(f"Template salvato in: {template_directory}")
 
+    def on_change_filter(self, e):
+        for filter, filter_items in self.checkboxes_filters.items():
+            Configuration.set_filter_values(filter, [item["name"] for item in filter_items if item["reference"].GetValue()])
+
+        if self.examly.is_source_validated():
+            self.filtered_questions_label.SetLabel(f"Domande selezionate: {str(self.examly.get_questions_cardinality())}")
+
     def on_open_style_options(self, e):
         fonts, languages = Configuration.get_selection_lists()
         dialog = StyleOptionsWindow(self, title="Opzioni di stile")
         if dialog.ShowModal() == wx.ID_OK:
-            print("Chiuso")
             Configuration.set_font(fonts[dialog.font_selection.GetSelection()])
             # Configuration.set_language(languages[dialog.language_selection.GetSelection()])
             Configuration.set_title_size(dialog.title_size_input.GetValue())
@@ -232,12 +240,14 @@ class MainWindow(wx.Frame):
             self.examly.write_exams()
             wx.CallAfter(self.on_complete)
 
+    # Aggiorna l'istanza con la nuoca sorgente
     def refresh_source(self):
         self.examly.load_source()
         self.refresh_filters()
         self.main_sizer.Fit(self.panel)
         self.Fit()
         self.Centre()
+        self.on_change_filter(None)
 
     def refresh_filters(self):
         self.global_filters_sizer.Clear(True)
@@ -259,6 +269,7 @@ class MainWindow(wx.Frame):
             filters_sizer.Add(filter_label, 0, wx.TOP | wx.LEFT, 5)
             for item in filter_items:
                 item["reference"] = wx.CheckBox(self.panel, label=str(item["label"]))
+                item["reference"].Bind(wx.EVT_CHECKBOX, self.on_change_filter)
                 filters_sizer.Add(item["reference"], 0, wx.ALL, 5)
             self.global_filters_sizer.Add(filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
         self.global_filters_sizer.Layout()

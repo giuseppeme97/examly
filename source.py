@@ -31,12 +31,10 @@ class Source:
 
     def set_filters(self) -> None:
         self.filters = {}
-        index_target = self.df.columns.get_loc(
-            Configuration.get_include_denomination())
+        index_target = self.df.columns.get_loc(Configuration.get_include_denomination())
         filter_keys = self.df.columns[:index_target].tolist()
         for filter_key in filter_keys:
-            self.filters[filter_key] = sorted(
-                pd.Series(self.df[filter_key].unique()).dropna().tolist())
+            self.filters[filter_key] = sorted(pd.Series(self.df[filter_key].unique()).dropna().tolist())
 
     def get_filters(self) -> list[str]:
         return self.filters

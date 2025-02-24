@@ -1,10 +1,14 @@
 import json
+import wx
 
 class Configuration:
+    app = wx.App(False)
+    font_enum = wx.FontEnumerator()
+    font_enum.EnumerateFacenames()
+
     default_app_name = "Examly"
-    gui_mode = False
+    default_fonts_list = ["Liberation Sans", "Liberation Serif", "---", *font_enum.GetFacenames()]
     default_languages_list = ["it-IT", "en-EN"]
-    default_fonts_list = ["Liberation Sans", "Liberation Serif", "---"]
     default_excel_formats_supported = [".xlsx", ".xls"]
     default_table_formats_supported = [".csv"]
     default_template_filename = "template.xlsx"
@@ -27,25 +31,26 @@ class Configuration:
     zip_filename = "compito"
     filters = {
         "MATERIA": ["SISTEMI E RETI"],
-        "CLASSE": [4], 
-        "PERIODO": [], 
+        "CLASSE": [3], 
+        "PERIODO": [1], 
         "SETTORE": []
     }
-    document_title = "Verifica scritta di Sistemi e Reti - A.S. 2024/2025 - Classe 4F"
+    document_title = "Prova comune di Informatica - A.S. 2024/2025 - Classi 3F 3G 3H 3I"
     document_subtitle = "Segnare solo una delle quattro opzioni per ciascuna domanda."
-    documents_number = 2
-    start_number = 1
+    documents_number = 1
+    start_number = 6
     questions_number = 20
     is_header_included = True
-    is_subtitle_included = True
+    is_subtitle_included = False
     are_pages_numbered = True
     are_documents_numbered = True
     are_questions_numbered = True
     are_questions_shuffled = True
     are_options_shuffled = True
-    are_solutions_exported = True
+    are_images_inserted = True
+    are_solutions_exported = False
     are_raw_exported = False       
-    are_questions_single_included = True
+    are_questions_single_included = False
     are_documents_exported_to_pdf = False
     are_documents_included_to_zip = False
     exact_document_number = None    
@@ -66,20 +71,6 @@ class Configuration:
     @classmethod
     def get_app_name(cls):
         return cls.default_app_name
-    
-    @classmethod
-    def set_gui_mode(cls, value):
-        cls.gui_mode = value
-        if cls.gui_mode:
-            import wx
-            _ = wx.App(False)
-            font_enum = wx.FontEnumerator()
-            font_enum.EnumerateFacenames()
-            cls.default_fonts_list = [*cls.default_fonts_list, *font_enum.GetFacenames()]
-
-    @classmethod
-    def get_gui_mode(cls):
-        return cls.gui_mode
 
     @classmethod
     def set_soffice_path(cls, value):
@@ -256,7 +247,15 @@ class Configuration:
     @classmethod
     def get_are_options_shuffled(cls):
         return cls.are_options_shuffled
+    
+    @classmethod
+    def set_are_images_inserted(cls, value):
+        cls.are_images_inserted = value
 
+    @classmethod
+    def get_are_images_inserted(cls):
+        return cls.are_images_inserted
+    
     @classmethod
     def set_are_solutions_exported(cls, value):
         cls.are_solutions_exported = value
@@ -486,6 +485,12 @@ class Configuration:
                 "default": Configuration.get_are_options_shuffled(),
                 "disabled": False
             },
+            Configuration.get_are_images_inserted.__name__.removeprefix("get_"): {
+                "label": "Inserisci immagini domande",
+                "reference": None,
+                "default": Configuration.get_are_images_inserted(),
+                "disabled": False
+            },
             Configuration.get_are_questions_single_included.__name__.removeprefix("get_"): {
                 "label": "Includi domande singolarmente",
                 "reference": None,
@@ -544,4 +549,3 @@ class Configuration:
             print(f"Errore: il file {file_path} non è stato trovato.")
         except json.JSONDecodeError:
             print(f"Errore: il file {file_path} non contiene un JSON valido.")
-
