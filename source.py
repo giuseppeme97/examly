@@ -1,19 +1,32 @@
 import os
 import pandas as pd
 from configs import Configuration
+from pymongo import MongoClient
 
 
 class Source:
     def __init__(self) -> None:
         self.loaded = False
-        self.load()
+
+        if Configuration.get_is_source_local():
+            self.load_locally()
+        else:
+            print("Connetto al DB...")
+            self.load_remotely()
+        
         if self.loaded:
             self.set_filters()
 
     def is_loaded(self) -> bool:
         return self.loaded
+    
+    def load_remotely(self) -> bool:
+        client = MongoClient(Configuration.get_source_db())
+        self.df = pd.DataFrame(list(client['examly']['domande'].find()))
+        self.df.drop(columns=["_id"], inplace=True)
+        self.loaded = True
 
-    def load(self) -> None:
+    def load_locally(self) -> None:
         _, ext = os.path.splitext(Configuration.get_source_file())
 
         if ext in Configuration.get_excel_formats_supported():

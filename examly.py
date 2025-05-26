@@ -12,8 +12,9 @@ class Examly():
         self.source_validated: bool = None
         self.console: callable = console if console else print
         self.console("Istanza di Examly creata.")
-        if not Utils.check_soffice(Configuration.get_soffice_path()):
-            self.console("ATTENZIONE: Comando soffice non presente nell'ambiente di esecuzione.")
+        
+        # if not Utils.check_soffice(Configuration.get_soffice_path()):
+        #     self.console("ATTENZIONE: Comando soffice non presente nell'ambiente di esecuzione.")
 
     def load_source(self) -> None:
         self.source = Source()
@@ -150,5 +151,5 @@ if __name__ == "__main__":
     examly.load_source()
 
     if examly.is_source_validated():
-        examly.write_exams()
-        # print(examly.get_questions_cardinality())
+        # examly.write_exams()
+        print(examly.get_questions_cardinality())

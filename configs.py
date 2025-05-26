@@ -23,7 +23,10 @@ class Configuration:
 
     # ------------------------------- #
     
+    is_source_local = False
+    is_destination_local = True 
     source_file = "/Users/giuseppe/Documents/examly/Domande.xlsx"
+    source_db = "mongodb://admin:password@localhost:27017/" 
     documents_directory = "/Users/giuseppe/Documents/examly/output"
     images_directory = "/Users/giuseppe/Documents/examly/images"
     template_directory = "/Users/giuseppe/Documents/examly/template"
@@ -79,6 +82,22 @@ class Configuration:
     @classmethod
     def get_soffice_path(cls):
         return cls.default_soffice_path
+    
+    @classmethod
+    def set_is_source_local(cls, value):
+        cls.is_source_local = value
+
+    @classmethod
+    def get_is_source_local(cls):
+        return cls.is_source_local
+    
+    @classmethod
+    def set_is_destination_local(cls, value):
+        cls.is_destination_local = value
+
+    @classmethod
+    def get_is_destination_local(cls):
+        return cls.is_destination_local
 
     @classmethod
     def set_source_file(cls, value):
@@ -87,6 +106,14 @@ class Configuration:
     @classmethod
     def get_source_file(cls):
         return cls.source_file
+    
+    @classmethod
+    def set_source_db(cls, value):
+        cls.source_db = value
+
+    @classmethod
+    def get_source_db(cls):
+        return cls.source_db
 
     @classmethod
     def set_documents_directory(cls, value):
