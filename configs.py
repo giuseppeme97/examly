@@ -23,7 +23,7 @@ class Configuration:
 
     # ------------------------------- #
     
-    is_source_local = False
+    is_source_local = True
     is_destination_local = True 
     source_file = "/Users/giuseppe/Documents/examly/Domande.xlsx"
     source_db = "mongodb://admin:password@localhost:27017/" 

@@ -11,15 +11,17 @@ class Source:
         if Configuration.get_is_source_local():
             self.load_locally()
         else:
-            print("Connetto al DB...")
             self.load_remotely()
-        
+
         if self.loaded:
             self.set_filters()
 
     def is_loaded(self) -> bool:
         return self.loaded
-    
+
+    def is_validated(self) -> bool:
+        return self.validated
+
     def load_remotely(self) -> bool:
         client = MongoClient(Configuration.get_source_db())
         self.df = pd.DataFrame(list(client['examly']['domande'].find()))
@@ -36,7 +38,6 @@ class Source:
             reader = pd.read_csv
 
         try:
-            print(Configuration.get_source_file())
             self.df = reader(Configuration.get_source_file())
             self.loaded = True
         except:
@@ -44,10 +45,12 @@ class Source:
 
     def set_filters(self) -> None:
         self.filters = {}
-        index_target = self.df.columns.get_loc(Configuration.get_include_denomination())
+        index_target = self.df.columns.get_loc(
+            Configuration.get_include_denomination())
         filter_keys = self.df.columns[:index_target].tolist()
         for filter_key in filter_keys:
-            self.filters[filter_key] = sorted(pd.Series(self.df[filter_key].unique()).dropna().tolist())
+            self.filters[filter_key] = sorted(
+                pd.Series(self.df[filter_key].unique()).dropna().tolist())
 
     def get_filters(self) -> list[str]:
         return self.filters
@@ -60,7 +63,67 @@ class Source:
         for i, row in self.df.iterrows():
             if pd.isna(row[Configuration.get_solution_denomination()]):
                 logs.append(i + 2)
+        return logs
 
+    def check(self) -> dict:
+        logs = []
+        questions_logs = self.check_questions()
+        options_logs = self.check_options_number()
+        orphans_logs = self.check_orphan_questions()
+        solutions_logs = self.check_solutions()
+
+        if len(questions_logs) > 0:
+            log = {
+                "message": "ERRORE: Alcune domande presenti nella sorgente non hanno testo.",
+                "result": " ".join(map(str, questions_logs)),
+                "type": "ERROR"
+            }
+            logs.append(log)
+            self.validated = False
+            return logs
+
+        if len(options_logs) > 0:
+            log = {
+                "message": "ERRORE: Alcune domande presenti nella sorgente non hanno un numero idoneo di opzioni.",
+                "result": " ".join(map(str, options_logs)),
+                "type": "ERROR"
+            }
+            logs.append(log)
+            self.validated = False
+            return logs
+
+        if len(orphans_logs) > 0:
+            log = {
+                "message": "ERRORE: Alcune domande presenti nella sorgente non hanno alcuni filtri assegnati.",
+                "result": " ".join(map(str, orphans_logs)),
+                "type": "ERROR"
+            }
+            logs.append(log)
+            self.validated = False
+            return logs
+
+        if len(solutions_logs) > 0:
+            log = {
+                "message": "ERRORE: Alcune domande presenti nella sorgente non hanno specificata l'opzione corretta.",
+                "result": " ".join(map(str, solutions_logs)),
+                "type": "ERROR"
+            }
+            logs.append(log)
+            self.validated = False
+            return logs
+
+        if Configuration.get_are_images_inserted():
+            if Configuration.get_images_directory():
+                images_log = self.check_images()
+                if len(images_log["file_mancanti"]) > 0:
+                    log = {
+                        "message": "ATTENZIONE: Alcune immagini presenti nella sorgente non sono state trovate.",
+                        "result": " ".join(map(str, images_log["file_mancanti"])),
+                        "type": "WARNING"
+                    }
+                    logs.append(log)
+
+        self.validated = True
         return logs
 
     def check_questions(self) -> list[int]:

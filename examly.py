@@ -9,7 +9,6 @@ from utils import Utils
 
 class Examly():
     def __init__(self, console: callable = None) -> None:
-        self.source_validated: bool = None
         self.console: callable = console if console else print
         self.console("Istanza di Examly creata.")
         
@@ -19,64 +18,25 @@ class Examly():
     def load_source(self) -> None:
         self.source = Source()
         if self.source.is_loaded():
-            questions_log = self.source.check_questions()
-            if len(questions_log) > 0:
-                self.console("\nERRORE: Alcune domande presenti nella sorgente non sono complete.")
-                self.console("Indici domande:")
-                self.console(" ".join(map(str, questions_log)))
-                self.source_validated = False
-                return
-
-            options_log = self.source.check_options_number()
-            if len(options_log) > 0:
-                self.console("\nERRORE: Alcune domande presenti nella sorgente non hanno un numero idoneo di opzioni.")
-                self.console("Indici domande:")
-                self.console(" ".join(map(str, options_log)))
-                self.source_validated = False
-                return
-
-            orphans_log = self.source.check_orphan_questions()
-            if len(orphans_log) > 0:
-                self.console("\nERRORE: Alcune domande presenti nella sorgente non hanno alcuni filtri assegnati.")
-                self.console("Indici domande:")
-                self.console(" ".join(map(str, orphans_log)))
-                self.source_validated = False
-                return
-
-            solutions_log = self.source.check_solutions()
-            if len(solutions_log) > 0:
-                self.console("\nATTENZIONE: Alcune domande presenti nella sorgente non hanno specificata l'opzione corretta.")
-                self.console("Indici domande:")
-                self.console(" ".join(map(str, solutions_log)))
-
-            if Configuration.get_are_images_inserted():
-                if Configuration.get_images_directory():
-                    images_log = self.source.check_images()
-                    if len(images_log["file_mancanti"]) > 0:
-                        self.console("\nATTENZIONE: Alcune immagini presenti nella sorgente non sono state trovate.")
-                        self.console("Immagini non trovate:")
-                        self.console(" ".join(map(str, images_log["file_mancanti"])))
-
-            self.console("Sorgente caricata correttamente.")
-            self.source_validated = True
+            logs = self.source.check()
+            if self.source.is_validated():
+                self.source.set_filters()
+                self.console("Sorgente caricata e validata.")
+            else:
+                for e in logs:
+                    self.console(e["message"])
+                    self.console(e["result"])
         else:
-            self.console("\nErrore nel caricamento della sorgente.")
-            self.source_validated = False
+            self.console("Errore nel caricamento della sorgente.")
 
     def is_source_validated(self) -> bool:
-        return self.source_validated
+        return self.source.is_validated()
     
     def get_filters(self) -> dict:
         return self.source.get_filters()
 
     def get_rows(self) -> int:
         return self.source.get_rows()
-
-    def set_source_file(self, source_file: str) -> None:
-        Configuration.set_source_file(source_file)
-
-    def set_documents_directory(self, documents_directory: str) -> None:
-        Configuration.set_documents_directory(documents_directory)
 
     def set_console(self, console: callable) -> None:
         self.console = console
