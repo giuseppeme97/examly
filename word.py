@@ -109,8 +109,9 @@ class Word():
         header = self.doc.add_heading(text_header, 3)
         if question_image:
             run_i = header.add_run()
-            image = run_i.add_picture(question_image, width=Inches(Configuration.get_images_size()))
-            self.add_image_shape(image)
+            if Configuration.get_are_images_inserted():
+                image = run_i.add_picture(question_image, width=Inches(Configuration.get_images_size()))
+                self.add_image_shape(image)
 
         if not question_image:
             header.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY

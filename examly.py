@@ -150,4 +150,5 @@ if __name__ == "__main__":
     examly.load_source()
 
     if examly.is_source_validated():
-        print(examly.get_questions_cardinality())
+        examly.write_exams()
+        # print(examly.get_questions_cardinality())

@@ -30,16 +30,16 @@ class Configuration:
     document_filename = "esame"
     zip_filename = "compito"
     filters = {
-        "MATERIA": ["SISTEMI E RETI"],
-        "CLASSE": [3], 
-        "PERIODO": [1], 
+        "MATERIA": ["ARDUINO"],
+        "CLASSE": [], 
+        "PERIODO": [], 
         "SETTORE": []
     }
-    document_title = "Prova comune di Informatica - A.S. 2024/2025 - Classi 3F 3G 3H 3I"
+    document_title = "Verifica scritta di Sistemi e Reti - A.S. 2024/2025 - Classe 3F"
     document_subtitle = "Segnare solo una delle quattro opzioni per ciascuna domanda."
     documents_number = 1
-    start_number = 6
-    questions_number = 20
+    start_number = 17
+    questions_number = 48
     is_header_included = True
     is_subtitle_included = False
     are_pages_numbered = True
@@ -47,10 +47,10 @@ class Configuration:
     are_questions_numbered = True
     are_questions_shuffled = True
     are_options_shuffled = True
-    are_images_inserted = True
-    are_solutions_exported = False
+    are_images_inserted = False
+    are_solutions_exported = True
     are_raw_exported = False       
-    are_questions_single_included = False
+    are_questions_single_included = True
     are_documents_exported_to_pdf = False
     are_documents_included_to_zip = False
     exact_document_number = None    
