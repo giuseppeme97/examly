@@ -8,20 +8,20 @@ from utils import Utils
 
 
 class Examly():
-    def __init__(self,  console: callable = None) -> None:
+    def __init__(self,  web_mode: bool, console: callable = None) -> None:
+        Configuration.set_is_web_mode(web_mode)
         self.console: callable = console if console else print
         self.ready = False
         self.console("Istanza di Examly creata.")
-
-    def set_source(self, source: str, web_mode: bool) -> None:
-        Configuration.set_is_web_mode(web_mode)
-        if web_mode:
+        
+    def connect_source(self, source: str) -> None:
+        if Configuration.get_is_web_mode():
             Configuration.set_source_collection(source)
         else:
             Configuration.set_source_file(source)
 
-    def load_source(self) -> None:
         self.source = Source()
+
         if self.source.is_loaded():
             logs = self.source.check()
             if self.source.is_validated():
@@ -212,10 +212,9 @@ class Examly():
 
 
 if __name__ == "__main__":
-    examly = Examly()
     
-    examly.set_source(source="Domande.xlsx", web_mode=False)
-    examly.load_source()
+    examly = Examly(web_mode=True)
+    examly.connect_source("domande")
     examly.set_documents_directory("/Users/giuseppe/Documents/examly/output")
     examly.set_images_directory("/Users/giuseppe/Documents/examly/images")
     examly.set_template_directory("/Users/giuseppe/Documents/examly/template")
@@ -223,7 +222,7 @@ if __name__ == "__main__":
     examly.set_zip_filename("compito")
     examly.set_filters({
         "MATERIA": ["SISTEMI E RETI"],
-        "CLASSE": [5],
+        "CLASSE": [],
         "PERIODO": [],
         "SETTORE": []
     })
@@ -257,5 +256,5 @@ if __name__ == "__main__":
 
     if examly.is_ready():
         # examly.write_exams()
-        print(examly.get_filters())
-        # print(examly.get_questions_cardinality())
+        # print(examly.get_filters())
+        print("Domande filtrate:", examly.get_questions_cardinality())

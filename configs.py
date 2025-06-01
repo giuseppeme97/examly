@@ -11,7 +11,7 @@ class Configuration:
 
     default_app_name = "Examly"
     # TODO: rendere riservati i dati
-    deafult_server = "mongodb://admin:password@localhost:27017/"
+    default_server = "mongodb://admin:password@localhost:27017/"
     default_db = "examly"
     default_fonts_list = ["Liberation Sans", "Liberation Serif"]
     default_languages_list = ["it-IT", "en-EN"]
@@ -96,11 +96,11 @@ class Configuration:
 
     @classmethod
     def set_server(cls, value):
-        cls.deafult_server = value
+        cls.default_server = value
 
     @classmethod
     def get_server(cls):
-        return cls.deafult_server
+        return cls.default_server
 
     @classmethod
     def set_db(cls, value):

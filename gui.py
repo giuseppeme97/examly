@@ -242,7 +242,7 @@ class MainWindow(wx.Frame):
 
     # Aggiorna l'istanza con la nuoca sorgente
     def refresh_source(self):
-        self.examly.load_source()
+        self.examly.connect_source()
         self.refresh_filters()
         self.main_sizer.Fit(self.panel)
         self.Fit()

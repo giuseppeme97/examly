@@ -1,12 +1,13 @@
 import os
 import pandas as pd
 from configs import Configuration
-from pymongo import MongoClient
+from mongo import MongoConnector
 
 
 class Source:
     def __init__(self) -> None:
         self.loaded = False
+        self.df = None
 
         if Configuration.get_is_web_mode():
             self.load_remotely()
@@ -23,15 +24,13 @@ class Source:
         return self.validated
 
     def load_remotely(self) -> bool:
-        client = MongoClient(Configuration.get_server())
-        
-        try:
-            self.df = pd.DataFrame(list(client[Configuration.get_db()][Configuration.get_source_collection()].find()))
-            self.df.drop(columns=["_id"], inplace=True)
+        self.mongo_client = MongoConnector()
+        self.df = self.mongo_client.get_df_from_collection(Configuration.get_source_collection())
+
+        if self.df is not None:
             self.loaded = True
-        except:
+        else:
             self.loaded = False
-        
 
     def load_locally(self) -> None:
         _, ext = os.path.splitext(Configuration.get_source_file())
