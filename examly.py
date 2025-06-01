@@ -8,32 +8,35 @@ from utils import Utils
 
 
 class Examly():
-    def __init__(self, console: callable = None) -> None:
+    def __init__(self,  console: callable = None) -> None:
         self.console: callable = console if console else print
+        self.ready = False
         self.console("Istanza di Examly creata.")
-        
-        # if not Utils.check_soffice(Configuration.get_soffice_path()):
-        #     self.console("ATTENZIONE: Comando soffice non presente nell'ambiente di esecuzione.")
+
+    def set_source(self, source: str, web_mode: bool) -> None:
+        Configuration.set_is_web_mode(web_mode)
+        if web_mode:
+            Configuration.set_source_collection(source)
+        else:
+            Configuration.set_source_file(source)
 
     def load_source(self) -> None:
         self.source = Source()
         if self.source.is_loaded():
             logs = self.source.check()
             if self.source.is_validated():
-                self.source.set_filters()
-                self.console("Sorgente caricata e validata.")
+                self.source.extract_filters()
+                self.ready = True
+                self.console("Sorgente caricata e validata. \nExamly pronto.")
             else:
-                for e in logs:
-                    self.console(e["message"])
-                    self.console(e["result"])
+                for log in logs:
+                    self.console(log["message"])
+                    self.console(log["result"])
         else:
             self.console("Errore nel caricamento della sorgente.")
 
-    def is_source_validated(self) -> bool:
-        return self.source.is_validated()
-    
-    def get_filters(self) -> dict:
-        return self.source.get_filters()
+    def is_ready(self) -> bool:
+        return self.ready
 
     def get_rows(self) -> int:
         return self.source.get_rows()
@@ -58,7 +61,7 @@ class Examly():
                 random.shuffle(question['options'])
 
         return questions[0: Configuration.get_questions_number()]
-    
+
     def get_questions_cardinality(self) -> int:
         return len(self.source.get_questions())
 
@@ -66,35 +69,27 @@ class Examly():
         word = Word(questions, document_number, is_solution)
         return word.save()
 
-    def write_exams(self, only_len=False) -> None:
+    def write_exams(self) -> None:
         Path(Configuration.get_documents_directory()).mkdir(parents=True, exist_ok=True)
         documents_list = []
         print("Genero documenti...")
 
         for document_number in range(Configuration.get_start_number(), Configuration.get_start_number() + Configuration.get_documents_number()):
             sampled_questions = self.sample_questions(self.source.get_questions())
-            
+
             if Configuration.get_are_raw_exported():
                 raw = {
                     "document": f"{Configuration.get_document_filename()}_{document_number}",
                     "content": sampled_questions
                 }
                 Utils.save_raw(Configuration.get_documents_directory(), f"{Configuration.get_document_filename()}_{document_number}", raw)
-            
+
             document_word_path = self.write_exam(sampled_questions, document_number, is_solution=False)
             documents_list.append(document_word_path)
-
-            if Configuration.get_are_documents_exported_to_pdf():
-                document_pdf_path = Utils.export_to_pdf(Configuration.get_soffice_path(), Configuration.get_documents_directory(), document_word_path)
-                documents_list.append(document_pdf_path)
 
             if Configuration.get_are_solutions_exported():
                 solution_word_path = self.write_exam(sampled_questions, document_number, is_solution=True)
                 documents_list.append(solution_word_path)
-
-                if Configuration.get_are_documents_exported_to_pdf():
-                    solution_pdf_path = Utils.export_to_pdf(Configuration.get_soffice_path(), Configuration.get_documents_directory(), solution_word_path)
-                    documents_list.append(solution_pdf_path)
 
         if Configuration.get_are_documents_included_to_zip():
             self.export_to_zip(documents_list)
@@ -103,13 +98,164 @@ class Examly():
 
     def export_to_zip(self, documents_list) -> None:
         zip_filename = f"{Configuration.get_zip_filename()}.zip"
-        Utils.documents_to_zip(Configuration.get_documents_directory(), documents_list, zip_filename)
+        Utils.documents_to_zip(
+            Configuration.get_documents_directory(), documents_list, zip_filename)
+
+    def set_documents_directory(self, value) -> None:
+        Configuration.set_documents_directory(value)
+
+    def set_images_directory(self, value) -> None:
+        Configuration.set_images_directory(value)
+
+    def set_template_directory(self, value) -> None:
+        Configuration.set_template_directory(value)
+
+    def set_template_filename(self, value) -> None:
+        Configuration.set_template_filename(value)
+
+    def set_document_filename(self, value) -> None:
+        Configuration.set_document_filename(value)
+
+    def set_zip_filename(self, value) -> None:
+        Configuration.set_zip_filename(value)
+
+    def get_filters(self) -> dict:
+        return self.source.get_filters()
+
+    def set_filters(self, filters: dict) -> None:
+        for key, value in filters.items():
+            Configuration.set_filter_values(key, value)
+
+    def set_document_title(self, value) -> None:
+        Configuration.set_document_title(value)
+
+    def set_document_subtitle(self, value) -> None:
+        Configuration.set_document_subtitle(value)
+
+    def set_document_header(self, value) -> None:
+        Configuration.set_document_header(value)
+
+    def set_documents_number(self, value) -> None:
+        Configuration.set_documents_number(value)
+
+    def set_start_number(self, value) -> None:
+        Configuration.set_start_number(value)
+
+    def set_questions_number(self, value) -> None:
+        Configuration.set_questions_number(value)
+
+    def set_is_header_included(self, value=True) -> None:
+        Configuration.set_is_header_included(value)
+
+    def set_is_subtitle_included(self, value=True) -> None:
+        Configuration.set_is_subtitle_included(value)
+
+    def set_are_pages_numbered(self, value=True) -> None:
+        Configuration.set_are_pages_numbered(value)
+
+    def set_are_documents_numbered(self, value=True) -> None:
+        Configuration.set_are_documents_numbered(value)
+
+    def set_are_questions_numbered(self, value=True) -> None:
+        Configuration.set_are_questions_numbered(value)
+
+    def set_are_questions_shuffled(self, value=True) -> None:
+        Configuration.set_are_questions_shuffled(value)
+
+    def set_are_options_shuffled(self, value=True) -> None:
+        Configuration.set_are_options_shuffled(value)
+
+    def set_are_images_inserted(self, value=False) -> None:
+        Configuration.set_are_images_inserted(value)
+
+    def set_are_solutions_exported(self, value=True) -> None:
+        Configuration.set_are_solutions_exported(value)
+
+    def set_are_raw_exported(self, value=False) -> None:
+        Configuration.set_are_raw_exported(value)
+
+    def set_are_questions_single_included(self, value=False) -> None:
+        Configuration.set_are_questions_single_included(value)
+
+    def set_are_documents_included_to_zip(self, value=False) -> None:
+        Configuration.set_are_documents_included_to_zip(value)
+
+    def set_exact_document_number(self, value=None) -> None:
+        Configuration.set_exact_document_number(value)
+
+    def set_font(self, value="Liberation Sans") -> None:
+        Configuration.set_font(value)
+
+    def set_language(self, value="it-IT") -> None:
+        Configuration.set_language(value)
+
+    def set_title_size(self, value=15) -> None:
+        Configuration.set_title_size(value)
+
+    def set_subtitle_size(self, value=12) -> None:
+        Configuration.set_subtitle_size(value)
+
+    def set_questions_size(self, value=11) -> None:
+        Configuration.set_questions_size(value)
+
+    def set_images_size(self, value=3.5) -> None:
+        Configuration.set_images_size(value)
+
+    def set_columns_number(self, value=2) -> None:
+        Configuration.set_columns_number(value)
+
+    def set_left_margin(self, value=1) -> None:
+        Configuration.set_left_margin(value)
+
+    def set_right_margin(self, value=1) -> None:
+        Configuration.set_right_margin(value)
 
 
 if __name__ == "__main__":
     examly = Examly()
+    
+    examly.set_source(source="Domande.xlsx", web_mode=False)
     examly.load_source()
+    examly.set_documents_directory("/Users/giuseppe/Documents/examly/output")
+    examly.set_images_directory("/Users/giuseppe/Documents/examly/images")
+    examly.set_template_directory("/Users/giuseppe/Documents/examly/template")
+    examly.set_document_filename("esame")
+    examly.set_zip_filename("compito")
+    examly.set_filters({
+        "MATERIA": ["SISTEMI E RETI"],
+        "CLASSE": [5],
+        "PERIODO": [],
+        "SETTORE": []
+    })
+    examly.set_document_title("Verifica scritta di Sistemi e Reti - A.S. 2024/2025 - Classe 4F")
+    examly.set_document_subtitle("Segnare solo una delle quattro opzioni per ciascuna domanda.")
+    examly.set_documents_number(5)
+    examly.set_start_number(1)
+    examly.set_questions_number(30)
+    examly.set_is_header_included(True)
+    examly.set_is_subtitle_included(True)
+    examly.set_are_pages_numbered(True)
+    examly.set_are_documents_numbered(True)
+    examly.set_are_questions_numbered(True)
+    examly.set_are_questions_shuffled(True)
+    examly.set_are_options_shuffled(True)
+    examly.set_are_images_inserted(False)
+    examly.set_are_solutions_exported(True)
+    examly.set_are_raw_exported(False)
+    examly.set_are_questions_single_included(False)
+    examly.set_are_documents_included_to_zip(False)
+    examly.set_exact_document_number(None)
+    examly.set_font()
+    examly.set_language()
+    examly.set_title_size(15)
+    examly.set_subtitle_size(12)
+    examly.set_questions_size(11)
+    examly.set_images_size(3.5)
+    examly.set_columns_number(2)
+    examly.set_left_margin(1)
+    examly.set_right_margin(1)
 
-    if examly.is_source_validated():
+    if examly.is_ready():
         # examly.write_exams()
-        print(examly.get_questions_cardinality())
+        print(examly.get_filters())
+        # print(examly.get_questions_cardinality())

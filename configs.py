@@ -1,13 +1,19 @@
 import json
 import wx
 
+
 class Configuration:
-    app = wx.App(False)
-    font_enum = wx.FontEnumerator()
-    font_enum.EnumerateFacenames()
+    # app = wx.App(False)
+    # font_enum = wx.FontEnumerator()
+    # font_enum.EnumerateFacenames()
+
+    # ------------------------------- #
 
     default_app_name = "Examly"
-    default_fonts_list = ["Liberation Sans", "Liberation Serif", "---", *font_enum.GetFacenames()]
+    # TODO: rendere riservati i dati
+    deafult_server = "mongodb://admin:password@localhost:27017/"
+    default_db = "examly"
+    default_fonts_list = ["Liberation Sans", "Liberation Serif"]
     default_languages_list = ["it-IT", "en-EN"]
     default_excel_formats_supported = [".xlsx", ".xls"]
     default_table_formats_supported = [".csv"]
@@ -19,54 +25,51 @@ class Configuration:
     default_option_denomination = "OPZIONE"
     default_include_accept_denomination = "SI"
     default_document_header = "Cognome e Nome: ________________________________________________________"
-    default_soffice_path = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
 
     # ------------------------------- #
-    
-    is_source_local = True
-    is_destination_local = True 
-    source_file = "/Users/giuseppe/Documents/examly/Domande.xlsx"
-    source_db = "mongodb://admin:password@localhost:27017/" 
-    documents_directory = "/Users/giuseppe/Documents/examly/output"
-    images_directory = "/Users/giuseppe/Documents/examly/images"
-    template_directory = "/Users/giuseppe/Documents/examly/template"
-    document_filename = "esame"
-    zip_filename = "compito"
-    filters = {
-        "MATERIA": ["ARDUINO"],
-        "CLASSE": [], 
-        "PERIODO": [], 
-        "SETTORE": []
-    }
-    document_title = "Verifica scritta di Sistemi e Reti - A.S. 2024/2025 - Classe 3F"
-    document_subtitle = "Segnare solo una delle quattro opzioni per ciascuna domanda."
-    documents_number = 1
-    start_number = 17
-    questions_number = 48
-    is_header_included = True
-    is_subtitle_included = False
-    are_pages_numbered = True
-    are_documents_numbered = True
-    are_questions_numbered = True
-    are_questions_shuffled = True
-    are_options_shuffled = True
-    are_images_inserted = False
-    are_solutions_exported = True
-    are_raw_exported = False       
-    are_questions_single_included = True
-    are_documents_exported_to_pdf = False
-    are_documents_included_to_zip = False
-    exact_document_number = None    
-    font = default_fonts_list[0]
-    language  = default_languages_list[0]
-    title_size = 15
-    subtitle_size = 12
-    questions_size = 11
-    images_size = 3.5
-    columns_number = 2
-    left_margin = 1
-    right_margin = 1
-    
+
+    web_mode = None
+    source_file = None
+    source_collection = None
+    documents_directory = None
+    images_directory = None
+    template_directory = None
+
+    # ------------------------------- #
+
+    document_filename = None
+    zip_filename = None
+    filters = {}
+    document_title = None
+    document_subtitle = None
+    documents_number = None
+    start_number = None
+    questions_number = None
+    is_header_included = None
+    is_subtitle_included = None
+    are_pages_numbered = None
+    are_documents_numbered = None
+    are_questions_numbered = None
+    are_questions_shuffled = None
+    are_options_shuffled = None
+    are_images_inserted = None
+    are_solutions_exported = None
+    are_raw_exported = None
+    are_questions_single_included = None
+    are_documents_included_to_zip = None
+    exact_document_number = None
+    font = None
+    language = None
+    title_size = None
+    subtitle_size = None
+    questions_size = None
+    images_size = None
+    columns_number = None
+    left_margin = None
+    right_margin = None
+
+    # ------------------------------- #
+
     @classmethod
     def set_app_name(cls, value):
         cls.default_app_name = value
@@ -76,28 +79,12 @@ class Configuration:
         return cls.default_app_name
 
     @classmethod
-    def set_soffice_path(cls, value):
-        cls.default_soffice_path = value
+    def set_is_web_mode(cls, value):
+        cls.web_mode = value
 
     @classmethod
-    def get_soffice_path(cls):
-        return cls.default_soffice_path
-    
-    @classmethod
-    def set_is_source_local(cls, value):
-        cls.is_source_local = value
-
-    @classmethod
-    def get_is_source_local(cls):
-        return cls.is_source_local
-    
-    @classmethod
-    def set_is_destination_local(cls, value):
-        cls.is_destination_local = value
-
-    @classmethod
-    def get_is_destination_local(cls):
-        return cls.is_destination_local
+    def get_is_web_mode(cls):
+        return cls.web_mode
 
     @classmethod
     def set_source_file(cls, value):
@@ -106,14 +93,30 @@ class Configuration:
     @classmethod
     def get_source_file(cls):
         return cls.source_file
-    
-    @classmethod
-    def set_source_db(cls, value):
-        cls.source_db = value
 
     @classmethod
-    def get_source_db(cls):
-        return cls.source_db
+    def set_server(cls, value):
+        cls.deafult_server = value
+
+    @classmethod
+    def get_server(cls):
+        return cls.deafult_server
+
+    @classmethod
+    def set_db(cls, value):
+        cls.default_db = value
+
+    @classmethod
+    def get_db(cls):
+        return cls.default_db
+
+    @classmethod
+    def set_source_collection(cls, value):
+        cls.source_collection = value
+
+    @classmethod
+    def get_source_collection(cls):
+        return cls.source_collection
 
     @classmethod
     def set_documents_directory(cls, value):
@@ -162,7 +165,7 @@ class Configuration:
     @classmethod
     def get_zip_filename(cls):
         return cls.zip_filename
-    
+
     @classmethod
     def set_filter_values(cls, filter, values):
         cls.filters[filter] = values
@@ -178,7 +181,7 @@ class Configuration:
     @classmethod
     def get_document_title(cls):
         return cls.document_title
-    
+
     @classmethod
     def set_document_subtitle(cls, value):
         cls.document_subtitle = value
@@ -202,7 +205,7 @@ class Configuration:
     @classmethod
     def get_documents_number(cls):
         return cls.documents_number
-    
+
     @classmethod
     def set_start_number(cls, value):
         cls.start_number = value
@@ -218,7 +221,7 @@ class Configuration:
     @classmethod
     def get_questions_number(cls):
         return cls.questions_number
-    
+
     @classmethod
     def set_is_header_included(cls, value):
         cls.is_header_included = value
@@ -226,7 +229,7 @@ class Configuration:
     @classmethod
     def get_is_header_included(cls):
         return cls.is_header_included
-    
+
     @classmethod
     def set_is_subtitle_included(cls, value):
         cls.is_subtitle_included = value
@@ -234,7 +237,7 @@ class Configuration:
     @classmethod
     def get_is_subtitle_included(cls):
         return cls.is_subtitle_included
-    
+
     @classmethod
     def set_are_pages_numbered(cls, value):
         cls.are_pages_numbered = value
@@ -274,7 +277,7 @@ class Configuration:
     @classmethod
     def get_are_options_shuffled(cls):
         return cls.are_options_shuffled
-    
+
     @classmethod
     def set_are_images_inserted(cls, value):
         cls.are_images_inserted = value
@@ -282,7 +285,7 @@ class Configuration:
     @classmethod
     def get_are_images_inserted(cls):
         return cls.are_images_inserted
-    
+
     @classmethod
     def set_are_solutions_exported(cls, value):
         cls.are_solutions_exported = value
@@ -290,7 +293,7 @@ class Configuration:
     @classmethod
     def get_are_solutions_exported(cls):
         return cls.are_solutions_exported
-    
+
     @classmethod
     def set_are_raw_exported(cls, value):
         cls.are_raw_exported = value
@@ -306,14 +309,6 @@ class Configuration:
     @classmethod
     def get_are_questions_single_included(cls):
         return cls.are_questions_single_included
-
-    @classmethod
-    def set_are_documents_exported_to_pdf(cls, value):
-        cls.are_documents_exported_to_pdf = value
-
-    @classmethod
-    def get_are_documents_exported_to_pdf(cls):
-        return cls.are_documents_exported_to_pdf
 
     @classmethod
     def set_are_documents_included_to_zip(cls, value):
@@ -332,16 +327,8 @@ class Configuration:
         return cls.exact_document_number
 
     @classmethod
-    def set_excel_formats_supported(cls, value):
-        cls.default_excel_formats_supported = value
-
-    @classmethod
     def get_excel_formats_supported(cls):
         return cls.default_excel_formats_supported
-
-    @classmethod
-    def set_table_formats_supported(cls, value):
-        cls.default_table_formats_supported = value
 
     @classmethod
     def get_table_formats_supported(cls):
@@ -418,7 +405,7 @@ class Configuration:
     @classmethod
     def get_title_size(cls):
         return cls.title_size
-    
+
     @classmethod
     def set_subtitle_size(cls, value):
         cls.subtitle_size = int(value)
@@ -434,7 +421,7 @@ class Configuration:
     @classmethod
     def get_questions_size(cls):
         return cls.questions_size
-    
+
     @classmethod
     def set_images_size(cls, value):
         cls.images_size = float(value)
@@ -466,7 +453,7 @@ class Configuration:
     @classmethod
     def get_right_margin(cls):
         return cls.right_margin
-    
+
     @classmethod
     def get_control_options(cls):
         return {
@@ -536,12 +523,6 @@ class Configuration:
                 "default": Configuration.get_are_raw_exported(),
                 "disabled": False
             },
-            Configuration.get_are_documents_exported_to_pdf.__name__.removeprefix("get_"): {
-                "label": "Esporta in PDF",
-                "reference": None,
-                "default": Configuration.get_are_documents_exported_to_pdf(),
-                "disabled": False
-            },
             Configuration.get_are_documents_included_to_zip.__name__.removeprefix("get_"): {
                 "label": "Esporta in ZIP",
                 "reference": None,
@@ -556,8 +537,9 @@ class Configuration:
 
     @classmethod
     def export_config(cls, file_path):
-        attributi = {k: v for k, v in cls.__dict__.items() if not k.startswith("__") and not callable(v)}
-        
+        attributi = {k: v for k, v in cls.__dict__.items(
+        ) if not k.startswith("__") and not callable(v)}
+
         with open(file_path, "w") as file:
             json.dump(attributi, file, indent=4)
         print(f"Configurazione esportata con successo in {file_path}")
@@ -567,7 +549,7 @@ class Configuration:
         try:
             with open(file_path, "r") as file:
                 dati = json.load(file)
-                
+
                 for chiave, valore in dati.items():
                     if hasattr(cls, chiave):
                         setattr(cls, chiave, valore)

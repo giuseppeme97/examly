@@ -8,13 +8,13 @@ class Source:
     def __init__(self) -> None:
         self.loaded = False
 
-        if Configuration.get_is_source_local():
-            self.load_locally()
-        else:
+        if Configuration.get_is_web_mode():
             self.load_remotely()
-
+        else:
+            self.load_locally()
+            
         if self.loaded:
-            self.set_filters()
+            self.extract_filters()
 
     def is_loaded(self) -> bool:
         return self.loaded
@@ -23,10 +23,15 @@ class Source:
         return self.validated
 
     def load_remotely(self) -> bool:
-        client = MongoClient(Configuration.get_source_db())
-        self.df = pd.DataFrame(list(client['examly']['domande'].find()))
-        self.df.drop(columns=["_id"], inplace=True)
-        self.loaded = True
+        client = MongoClient(Configuration.get_server())
+        
+        try:
+            self.df = pd.DataFrame(list(client[Configuration.get_db()][Configuration.get_source_collection()].find()))
+            self.df.drop(columns=["_id"], inplace=True)
+            self.loaded = True
+        except:
+            self.loaded = False
+        
 
     def load_locally(self) -> None:
         _, ext = os.path.splitext(Configuration.get_source_file())
@@ -43,14 +48,12 @@ class Source:
         except:
             self.loaded = False
 
-    def set_filters(self) -> None:
+    def extract_filters(self) -> None:
         self.filters = {}
-        index_target = self.df.columns.get_loc(
-            Configuration.get_include_denomination())
+        index_target = self.df.columns.get_loc(Configuration.get_include_denomination())
         filter_keys = self.df.columns[:index_target].tolist()
         for filter_key in filter_keys:
-            self.filters[filter_key] = sorted(
-                pd.Series(self.df[filter_key].unique()).dropna().tolist())
+            self.filters[filter_key] = sorted(pd.Series(self.df[filter_key].unique()).dropna().tolist())
 
     def get_filters(self) -> list[str]:
         return self.filters

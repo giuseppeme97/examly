@@ -192,7 +192,7 @@ class MainWindow(wx.Frame):
         for filter, filter_items in self.checkboxes_filters.items():
             Configuration.set_filter_values(filter, [item["name"] for item in filter_items if item["reference"].GetValue()])
 
-        if self.examly.is_source_validated():
+        if self.examly.is_ready():
             self.filtered_questions_label.SetLabel(f"Domande selezionate: {str(self.examly.get_questions_cardinality())}")
 
     def on_open_style_options(self, e):
@@ -236,7 +236,7 @@ class MainWindow(wx.Frame):
             self.start_btn.Enable()
 
     def run_examly(self):
-        if self.examly.is_source_validated():
+        if self.examly.is_ready():
             self.examly.write_exams()
             wx.CallAfter(self.on_complete)
 
