@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from configs import Configuration
-from mongo import MongoConnector
+from db import MongoConnector
 
 
 class Source:

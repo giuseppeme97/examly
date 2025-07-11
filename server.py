@@ -1,18 +1,22 @@
-from pydantic import BaseModel
 from examly import Examly
-from mongo import MongoConnector
+from db import MongoConnector
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from models import BaseRequest, CompleteRequest
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 examly = Examly(web_mode=True)
 mongo_connector = MongoConnector()
-
-
-class BaseRequest(BaseModel):
-    source: str
-    filters: dict
-    options: dict
 
 
 @app.get("/")
@@ -22,10 +26,11 @@ def read_root():
 
 @app.post("/filters/")
 async def get_filters(item: BaseRequest):
+    print(item)
     examly.connect_source(item.source)
 
     if examly.is_ready():
-        return examly.get_filters()
+        return {"result": examly.get_filters()}
     else:
         raise HTTPException(
             status_code=500, detail="Errore nel recupero dei filtri.")
@@ -33,7 +38,7 @@ async def get_filters(item: BaseRequest):
 
 @app.get("/sources/")
 async def get_sources():
-    return mongo_connector.get_all_collections()
+    return {"result": mongo_connector.get_all_collections()}
 
 
 @app.post("/sources/")
@@ -53,7 +58,7 @@ async def new_source(file: UploadFile = File(...)):
 
 
 @app.post("/cardinality/")
-async def get_cardinality(item: BaseRequest):
+async def get_cardinality(item: CompleteRequest):
     examly.connect_source(item.source)
 
     if examly.is_ready():

@@ -35,15 +35,15 @@ class Utils:
         except:
             return False
 
-    @staticmethod
-    def export_to_pdf(soffice_path, destination_directory, file_path) -> str:
-        command = [soffice_path, "--headless", "--convert-to", "pdf", "--outdir", destination_directory, file_path]
+    # @staticmethod
+    # def export_to_pdf(soffice_path, destination_directory, file_path) -> str:
+    #     command = [soffice_path, "--headless", "--convert-to", "pdf", "--outdir", destination_directory, file_path]
 
-        try:
-            subprocess.run(command, check=True, capture_output=True, text=True)
-            return file_path.replace(".docx", ".pdf")
-        except:
-            return None
+    #     try:
+    #         subprocess.run(command, check=True, capture_output=True, text=True)
+    #         return file_path.replace(".docx", ".pdf")
+    #     except:
+    #         return None
 
     @staticmethod
     def documents_to_zip(documents_directory, documents_list, zip_filename) -> str:
