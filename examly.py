@@ -8,13 +8,13 @@ from utils import Utils
 
 
 class Examly():
-    def __init__(self,  web_mode: bool, console: callable = None) -> None:
-        Configuration.set_is_web_mode(web_mode)
-        self.console: callable = console if console else print
+    def __init__(self) -> None:
+        self.console = print
         self.ready = False
         self.console("Istanza di Examly creata.")
         
-    def connect_source(self, source: str) -> None:
+    def connect_source(self, web_mode: bool, source: str) -> None:
+        Configuration.set_is_web_mode(web_mode)
         if Configuration.get_is_web_mode():
             Configuration.set_source_collection(source)
         else:
@@ -27,7 +27,7 @@ class Examly():
             if self.source.is_validated():
                 self.source.extract_filters()
                 self.ready = True
-                self.console("Sorgente caricata e validata. \nExamly pronto.")
+                self.console("🔍 Sorgente caricata e validata.")
             else:
                 for log in logs:
                     self.console(log["message"])
@@ -72,7 +72,6 @@ class Examly():
     def write_exams(self) -> None:
         Path(Configuration.get_documents_directory()).mkdir(parents=True, exist_ok=True)
         documents_list = []
-        print("Genero documenti...")
 
         for document_number in range(Configuration.get_start_number(), Configuration.get_start_number() + Configuration.get_documents_number()):
             sampled_questions = self.sample_questions(self.source.get_questions())
@@ -87,6 +86,8 @@ class Examly():
             document_word_path = self.write_exam(sampled_questions, document_number, is_solution=False)
             documents_list.append(document_word_path)
 
+            print(f"✅ Generato documento {document_number}.")
+
             if Configuration.get_are_solutions_exported():
                 solution_word_path = self.write_exam(sampled_questions, document_number, is_solution=True)
                 documents_list.append(solution_word_path)
@@ -94,7 +95,7 @@ class Examly():
         if Configuration.get_are_documents_included_to_zip():
             self.export_to_zip(documents_list)
 
-        print("Documenti generati correttamente!")
+        print("FINE!")
 
     def export_to_zip(self, documents_list) -> None:
         zip_filename = f"{Configuration.get_zip_filename()}.zip"
@@ -212,25 +213,24 @@ class Examly():
 
 
 if __name__ == "__main__":
-    
-    examly = Examly(web_mode=True)
-    examly.connect_source("domande")
+    examly = Examly()
+    examly.connect_source(web_mode=False, source="Domande.xlsx")
     examly.set_documents_directory("/Users/giuseppe/Documents/examly/output")
     examly.set_images_directory("/Users/giuseppe/Documents/examly/images")
     examly.set_template_directory("/Users/giuseppe/Documents/examly/template")
     examly.set_document_filename("esame")
     examly.set_zip_filename("compito")
     examly.set_filters({
-        "MATERIA": ["SISTEMI E RETI"],
-        "CLASSE": [],
+        "MATERIA": ["INFORMATICA"],
+        "CLASSE": [5],
         "PERIODO": [],
         "SETTORE": []
     })
-    examly.set_document_title("Verifica scritta di Sistemi e Reti - A.S. 2024/2025 - Classe 4F")
+    examly.set_document_title("Verifica scritta di Informatica - A.S. 2025/2026 - Classe 5H")
     examly.set_document_subtitle("Segnare solo una delle quattro opzioni per ciascuna domanda.")
-    examly.set_documents_number(5)
+    examly.set_documents_number(1)
     examly.set_start_number(1)
-    examly.set_questions_number(30)
+    examly.set_questions_number(20)
     examly.set_is_header_included(True)
     examly.set_is_subtitle_included(True)
     examly.set_are_pages_numbered(True)
@@ -240,8 +240,8 @@ if __name__ == "__main__":
     examly.set_are_options_shuffled(True)
     examly.set_are_images_inserted(False)
     examly.set_are_solutions_exported(True)
-    examly.set_are_raw_exported(False)
-    examly.set_are_questions_single_included(False)
+    examly.set_are_raw_exported(True)
+    examly.set_are_questions_single_included(True)
     examly.set_are_documents_included_to_zip(False)
     examly.set_exact_document_number(None)
     examly.set_font()
@@ -255,6 +255,5 @@ if __name__ == "__main__":
     examly.set_right_margin(1)
 
     if examly.is_ready():
-        # examly.write_exams()
-        # print(examly.get_filters())
-        print("Domande filtrate:", examly.get_questions_cardinality())
+        examly.write_exams()
+        # print("Domande filtrate:", examly.get_questions_cardinality())

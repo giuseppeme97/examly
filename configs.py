@@ -1,5 +1,5 @@
 import json
-import wx
+#import wx
 
 
 class Configuration:
