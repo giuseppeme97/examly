@@ -1,11 +1,11 @@
 import json
-#import wx
+import wx
 
 
 class Configuration:
-    # app = wx.App(False)
-    # font_enum = wx.FontEnumerator()
-    # font_enum.EnumerateFacenames()
+    app = wx.App(False)
+    font_enum = wx.FontEnumerator()
+    font_enum.EnumerateFacenames()
 
     # ------------------------------- #
 
@@ -37,36 +37,36 @@ class Configuration:
 
     # ------------------------------- #
 
-    document_filename = None
-    zip_filename = None
+    document_filename = ""
+    zip_filename = ""
     filters = {}
-    document_title = None
-    document_subtitle = None
-    documents_number = None
-    start_number = None
-    questions_number = None
-    is_header_included = None
-    is_subtitle_included = None
-    are_pages_numbered = None
-    are_documents_numbered = None
-    are_questions_numbered = None
-    are_questions_shuffled = None
-    are_options_shuffled = None
-    are_images_inserted = None
-    are_solutions_exported = None
-    are_raw_exported = None
-    are_questions_single_included = None
-    are_documents_included_to_zip = None
-    exact_document_number = None
-    font = None
-    language = None
-    title_size = None
-    subtitle_size = None
-    questions_size = None
-    images_size = None
-    columns_number = None
-    left_margin = None
-    right_margin = None
+    document_title = ""
+    document_subtitle = ""
+    documents_number = 1
+    start_number = 1
+    questions_number = 10
+    is_header_included = True
+    is_subtitle_included = True
+    are_pages_numbered = True
+    are_documents_numbered = True
+    are_questions_numbered = True
+    are_questions_shuffled = True
+    are_options_shuffled = True
+    are_images_inserted = False
+    are_solutions_exported = True
+    are_raw_exported = False
+    are_questions_single_included = True
+    are_documents_included_to_zip = False
+    exact_document_number = False
+    font = "Liberation Sans"
+    language = "it-IT"
+    title_size = 15
+    subtitle_size = 12
+    questions_size = 11
+    images_size = 3.5
+    columns_number = 2
+    left_margin = 1
+    right_margin = 1
 
     # ------------------------------- #
 

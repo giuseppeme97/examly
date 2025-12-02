@@ -210,12 +210,18 @@ class MainWindow(wx.Frame):
         dialog.Destroy()
 
     def on_start(self, e):
+
+        #TODO check
         Configuration.set_document_filename(self.document_filename_input.GetValue())
         Configuration.set_zip_filename(self.zip_filename_input.GetValue())
+        
+        self.examly.console(Configuration.get_zip_filename())
         Configuration.set_documents_number(int(self.documents_number_input.GetValue()))
         Configuration.set_start_number(int(self.start_number_input.GetValue()))
         Configuration.set_questions_number(int(self.questions_number_input.GetValue()))
         Configuration.set_document_title(self.document_title_input.GetValue())
+
+        wx.MessageBox("Messaggio di prova!", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
 
         for filter, filter_items in self.checkboxes_filters.items():
             Configuration.set_filter_values(filter, [item["name"] for item in filter_items if item["reference"].GetValue()])
@@ -242,7 +248,7 @@ class MainWindow(wx.Frame):
 
     # Aggiorna l'istanza con la nuoca sorgente
     def refresh_source(self):
-        self.examly.connect_source()
+        self.examly.connect_source(web_mode=False, source=Configuration.get_source_file())
         self.refresh_filters()
         self.main_sizer.Fit(self.panel)
         self.Fit()

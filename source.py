@@ -212,4 +212,7 @@ class Source:
                     i = i + 1
 
                 questions.append(question)
+
+        # temp = pd.DataFrame.from_dict(questions)
+        # temp.to_excel('sampled.xlsx')
         return questions

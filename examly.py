@@ -8,8 +8,8 @@ from utils import Utils
 
 
 class Examly():
-    def __init__(self) -> None:
-        self.console = print
+    def __init__(self, console) -> None:
+        self.console = console or print
         self.ready = False
         self.console("Istanza di Examly creata.")
         
@@ -75,22 +75,33 @@ class Examly():
 
         for document_number in range(Configuration.get_start_number(), Configuration.get_start_number() + Configuration.get_documents_number()):
             sampled_questions = self.sample_questions(self.source.get_questions())
+            
+            document_word_path = self.write_exam(sampled_questions, document_number, is_solution=False)
+            documents_list.append(document_word_path)
 
             if Configuration.get_are_raw_exported():
-                raw = {
+                raw_document = {
                     "document": f"{Configuration.get_document_filename()}_{document_number}",
                     "content": sampled_questions
                 }
-                Utils.save_raw(Configuration.get_documents_directory(), f"{Configuration.get_document_filename()}_{document_number}", raw)
-
-            document_word_path = self.write_exam(sampled_questions, document_number, is_solution=False)
-            documents_list.append(document_word_path)
+                Utils.save_raw(Configuration.get_documents_directory(), f"{Configuration.get_document_filename()}_{document_number}", raw_document)
 
             print(f"✅ Generato documento {document_number}.")
 
             if Configuration.get_are_solutions_exported():
                 solution_word_path = self.write_exam(sampled_questions, document_number, is_solution=True)
                 documents_list.append(solution_word_path)
+
+                if Configuration.get_are_raw_exported():
+                    raw_solution = {
+                        "document": document_number,
+                        "content": [{
+                            "id_question": index,
+                            "correct_option": next(i for i, x in enumerate(question["options"]) if x["correct"]) + 1
+                        } for index, question in enumerate(sampled_questions, start=1)]
+                    }   
+                    Utils.save_raw(Configuration.get_documents_directory(), f"{Configuration.get_document_filename()}_{document_number}_solutions", raw_solution)
+
 
         if Configuration.get_are_documents_included_to_zip():
             self.export_to_zip(documents_list)
@@ -214,7 +225,7 @@ class Examly():
 
 if __name__ == "__main__":
     examly = Examly()
-    examly.connect_source(web_mode=False, source="Domande.xlsx")
+    examly.connect_source(web_mode=False, source="inf.xlsx")
     examly.set_documents_directory("/Users/giuseppe/Documents/examly/output")
     examly.set_images_directory("/Users/giuseppe/Documents/examly/images")
     examly.set_template_directory("/Users/giuseppe/Documents/examly/template")
@@ -222,15 +233,15 @@ if __name__ == "__main__":
     examly.set_zip_filename("compito")
     examly.set_filters({
         "MATERIA": ["INFORMATICA"],
-        "CLASSE": [5],
+        "CLASSE": [],
         "PERIODO": [],
         "SETTORE": []
     })
-    examly.set_document_title("Verifica scritta di Informatica - A.S. 2025/2026 - Classe 5H")
+    examly.set_document_title("Prova comune di Informatica - A.S. 2025/2026 - Classi 3F 3G 3H")
     examly.set_document_subtitle("Segnare solo una delle quattro opzioni per ciascuna domanda.")
-    examly.set_documents_number(1)
+    examly.set_documents_number(3)
     examly.set_start_number(1)
-    examly.set_questions_number(20)
+    examly.set_questions_number(36)
     examly.set_is_header_included(True)
     examly.set_is_subtitle_included(True)
     examly.set_are_pages_numbered(True)
@@ -240,12 +251,12 @@ if __name__ == "__main__":
     examly.set_are_options_shuffled(True)
     examly.set_are_images_inserted(False)
     examly.set_are_solutions_exported(True)
-    examly.set_are_raw_exported(True)
+    examly.set_are_raw_exported(False)
     examly.set_are_questions_single_included(True)
     examly.set_are_documents_included_to_zip(False)
-    examly.set_exact_document_number(None)
-    examly.set_font()
-    examly.set_language()
+    examly.set_exact_document_number(False)
+    examly.set_font("Liberation Sans")
+    examly.set_language("it-IT")
     examly.set_title_size(15)
     examly.set_subtitle_size(12)
     examly.set_questions_size(11)

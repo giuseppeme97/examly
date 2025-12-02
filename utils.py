@@ -56,11 +56,11 @@ class Utils:
                     os.remove(document_path)
         return zip_path
 
-    # @staticmethod
-    # def only_integer(event):
-    #     import wx
-    #     key_code = event.GetKeyCode()
-    #     if not (ord('0') <= key_code <= ord('9')) and key_code != wx.WXK_BACK:
-    #         return
-    #     event.Skip()
+    @staticmethod
+    def only_integer(event):
+        import wx
+        key_code = event.GetKeyCode()
+        if not (ord('0') <= key_code <= ord('9')) and key_code != wx.WXK_BACK:
+            return
+        event.Skip()
 
