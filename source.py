@@ -9,14 +9,22 @@ class Source:
         self.loaded = False
         self.validated = False
         self.df = None
+        self.logs = None
+        self.load()
 
+    def load(self) -> bool:
         if Configuration.get_is_web_mode():
             self.load_remotely()
         else:
             self.load_locally()
             
-        if self.loaded:
+        if self.is_loaded():
             self.extract_filters()
+            self.logs = self.check()
+            return self.is_validated()
+
+    def get_logs(self) -> dict:
+        return self.logs
 
     def is_loaded(self) -> bool:
         return self.loaded
@@ -77,7 +85,7 @@ class Source:
 
         if len(questions_logs) > 0:
             log = {
-                "message": "ERRORE: Alcune domande presenti nella sorgente non hanno testo.",
+                "message": "Alcune domande non hanno testo.",
                 "result": " ".join(map(str, questions_logs)),
                 "type": "ERROR"
             }
@@ -87,7 +95,7 @@ class Source:
 
         if len(options_logs) > 0:
             log = {
-                "message": "ERRORE: Alcune domande presenti nella sorgente non hanno un numero idoneo di opzioni.",
+                "message": "Alcune domande non hanno un numero idoneo di opzioni.",
                 "result": " ".join(map(str, options_logs)),
                 "type": "ERROR"
             }
@@ -97,7 +105,7 @@ class Source:
 
         if len(orphans_logs) > 0:
             log = {
-                "message": "ERRORE: Alcune domande presenti nella sorgente non hanno alcuni filtri assegnati.",
+                "message": "Alcune domande non hanno tutti i filtri assegnati.",
                 "result": " ".join(map(str, orphans_logs)),
                 "type": "ERROR"
             }
@@ -107,7 +115,7 @@ class Source:
 
         if len(solutions_logs) > 0:
             log = {
-                "message": "ERRORE: Alcune domande presenti nella sorgente non hanno specificata l'opzione corretta.",
+                "message": "Alcune domande presenti non hanno specificata l'opzione corretta.",
                 "result": " ".join(map(str, solutions_logs)),
                 "type": "ERROR"
             }
@@ -120,7 +128,7 @@ class Source:
                 images_log = self.check_images()
                 if len(images_log["file_mancanti"]) > 0:
                     log = {
-                        "message": "ATTENZIONE: Alcune immagini presenti nella sorgente non sono state trovate.",
+                        "message": "ATTENZIONE: Alcune immagini associate alle domande non sono state trovate.",
                         "result": " ".join(map(str, images_log["file_mancanti"])),
                         "type": "WARNING"
                     }

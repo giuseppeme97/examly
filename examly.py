@@ -21,19 +21,16 @@ class Examly():
             Configuration.set_source_file(source)
 
         self.source = Source()
-
-        if self.source.is_loaded():
-            logs = self.source.check()
-            if self.source.is_validated():
-                self.source.extract_filters()
-                self.ready = True
-                self.console("🔍 Sorgente caricata e validata.")
-            else:
-                for log in logs:
-                    self.console(log["message"])
-                    self.console(log["result"])
+        
+        if self.source.load():
+            self.ready = True
+            self.console("✅ Sorgente caricata e validata.")
         else:
-            self.console("❌ Errore nel caricamento della sorgente.")
+            self.ready = False
+            self.console("❌ Errore nel caricamento o nella validazione della sorgente.")
+            for log in self.source.get_logs():
+                self.console(f"💬 {log["message"]} Righe: {log["result"]}")
+            
 
     def is_ready(self) -> bool:
         return self.ready
@@ -134,6 +131,8 @@ class Examly():
     def get_filters(self) -> dict:
         if self.source.is_validated():
             return self.source.get_filters()
+        else: 
+            return {}
 
     def set_filters(self, filters: dict) -> None:
         for key, value in filters.items():

@@ -9,13 +9,10 @@ from wxutils import LoadingWindow, StyleOptionsWindow
 class MainWindow(wx.Frame):
     def __init__(self, *args, **kw):
         super(MainWindow, self).__init__(*args, **kw)
-        self.init_control_options()
+        self.control_options = Configuration.get_control_options()
         self.init_ui()
         self.worker_thread = None
-        self.examly = Examly(console=self.printer)
-
-    def init_control_options(self):
-        self.control_options = Configuration.get_control_options()
+        self.examly = Examly(console=self.printer)        
 
     def init_ui(self):
         # Pannello principale
@@ -107,7 +104,7 @@ class MainWindow(wx.Frame):
         self.global_filters_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.left_sizer.Add(wx.StaticText(self.panel, label="Filtri:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.global_filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
-        self.filtered_questions_label = wx.StaticText(self.panel, label="Domande selezionate: 0")
+        self.filtered_questions_label = wx.StaticText(self.panel, label="Nessuna domanda filtrata.")
         font_filtered_questions_label = self.filtered_questions_label.GetFont()
         font_filtered_questions_label.MakeBold()
         self.filtered_questions_label.SetFont(font_filtered_questions_label)
@@ -123,6 +120,7 @@ class MainWindow(wx.Frame):
         for option, properties in self.control_options.items():
             properties["reference"] = wx.CheckBox(self.panel, label=f"{properties['label']}")
             properties["reference"].SetValue(properties["default"])
+            properties["reference"].Bind(wx.EVT_CHECKBOX, self.on_change_options_checkbox)                
             if properties["disabled"]:
                 properties["reference"].Disable()
             self.right_sizer.Add(properties["reference"], 0, wx.ALL, 5)
@@ -191,13 +189,10 @@ class MainWindow(wx.Frame):
             self.examly.new_template()
             self.printer(f"Template salvato in: {template_directory}")
 
-    def on_change_filter(self, e):
+    def on_change_filter_value(self, e):
         for filter, filter_items in self.checkboxes_filters.items():
             Configuration.set_filter_values(filter, [item["name"] for item in filter_items if item["reference"].GetValue()])
-
-        if self.examly.is_ready():
-            self.filtered_questions_label.SetLabel(f"Domande filtrate: {str(self.examly.get_questions_cardinality())}")
-
+        self.refresh_cardinality()
 
     def on_open_style_options(self, e):
         fonts, languages = Configuration.get_selection_lists()
@@ -229,12 +224,15 @@ class MainWindow(wx.Frame):
             wx.MessageBox("Non è stata caricata alcuna sorgente.", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
             return
         
+        if not self.examly.is_ready():
+            wx.MessageBox("La sorgente non è stata caricata correttamente o validata.", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
+            return
+        
         if not documents_directory_value:
             wx.MessageBox("Non è stata scelta la cartella di destinazione dei documenti.", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
             return
-
+        
         if document_filename_value and document_title_value and documents_number_value.isdigit() and start_number_value.isdigit() and questions_number_value.isdigit():
-            # wx.MessageBox("Tutti i campi presenti.", "Ottimo!", wx.OK | wx.ICON_INFORMATION)
             Configuration.set_document_filename(document_filename_value)
             Configuration.set_document_title(document_title_value)
             Configuration.set_document_subtitle(document_subtitle_value)
@@ -245,7 +243,6 @@ class MainWindow(wx.Frame):
         else:
             wx.MessageBox("Uno o più campi obbligatori mancanti.", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
             return
-        
         # END CHECK
 
         
@@ -267,25 +264,32 @@ class MainWindow(wx.Frame):
         if not self.worker_thread.is_alive():
             self.start_btn.Enable()
 
+    def on_change_options_checkbox(self, e):
+        for option, properties in self.control_options.items():
+            getattr(Configuration, f"set_{option}")(properties["reference"].GetValue())
+        self.refresh_cardinality()
+
     def run_examly(self):
         if self.examly.is_ready():
             self.examly.write_exams()
             wx.CallAfter(self.on_complete)
 
-    # Aggiorna l'istanza con la nuova sorgente
+    def refresh_cardinality(self):
+        if self.examly.is_ready():
+            self.filtered_questions_label.SetLabel(f"Domande filtrate: {str(self.examly.get_questions_cardinality())}")
+        else:
+            self.filtered_questions_label.SetLabel(f"Nessuna domanda filtrata.")
+
     def refresh_source(self):
         self.examly.connect_source(web_mode=False, source=Configuration.get_source_file())
-        if self.examly.is_ready():
-            self.refresh_filters()
-            self.main_sizer.Fit(self.panel)
-            self.Fit()
-            self.Centre()
-            self.on_change_filter(None)
-        else:
+        self.refresh_filters()
+        self.refresh_cardinality()
+        
+        if not self.examly.is_ready():
             wx.MessageBox("Errore nel caricamento o nella validazione della sorgente.", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
-
-
+            
     def refresh_filters(self):
+        self.printer("🔄 Aggiorno filtri...")
         self.global_filters_sizer.Clear(True)
         self.filters = self.examly.get_filters()
         self.checkboxes_filters = {}
@@ -302,13 +306,18 @@ class MainWindow(wx.Frame):
         for filter, filter_items in self.checkboxes_filters.items():
             filters_sizer = wx.BoxSizer(wx.VERTICAL)
             filter_label = wx.StaticText(self.panel, label=f"{filter}:")
+            filter_label.SetForegroundColour(wx.Colour(0, 0, 255))
             filters_sizer.Add(filter_label, 0, wx.TOP | wx.LEFT, 5)
             for item in filter_items:
                 item["reference"] = wx.CheckBox(self.panel, label=str(item["label"]))
-                item["reference"].Bind(wx.EVT_CHECKBOX, self.on_change_filter)
+                item["reference"].Bind(wx.EVT_CHECKBOX, self.on_change_filter_value)
                 filters_sizer.Add(item["reference"], 0, wx.ALL, 5)
             self.global_filters_sizer.Add(filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
         self.global_filters_sizer.Layout()
+        self.main_sizer.Fit(self.panel)
+        self.Fit()
+        self.Centre()
+        self.on_change_filter_value(None)
 
     def printer(self, message):
         self.console_output.AppendText(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}] {message}' + "\n")
