@@ -24,35 +24,34 @@ class MainWindow(wx.Frame):
         # Pulsante source_file
         source_file_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.source_file_label = wx.StaticText(self.panel, label="Nessuna sorgente selezionata")
-        source_file_btn = wx.Button(self.panel, label="Sorgente domande...")
-        source_file_btn.Bind(wx.EVT_BUTTON, self.on_select_source_file)
-        source_file_sizer.Add(source_file_btn, 0, wx.ALL | wx.CENTER, 5)
+        self.source_file_btn = wx.Button(self.panel, label="Sorgente domande...")
+        self.source_file_btn.Bind(wx.EVT_BUTTON, self.on_select_source_file)
+        source_file_sizer.Add(self.source_file_btn, 0, wx.ALL | wx.CENTER, 5)
         source_file_sizer.Add(self.source_file_label, 1, wx.ALL | wx.CENTER, 5)
         self.left_sizer.Add(source_file_sizer, 0, wx.EXPAND)
-
-        # Pulsante images_directory
-        images_directory_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.images_directory_label = wx.StaticText(self.panel, label="Nessuna cartella immagini selezionata")
-        images_directory_btn = wx.Button(self.panel, label="Sorgente immagini...")
-        images_directory_btn.Bind(wx.EVT_BUTTON, self.on_select_images_directory)
-        images_directory_sizer.Add(images_directory_btn, 0, wx.ALL | wx.CENTER, 5)
-        images_directory_sizer.Add(self.images_directory_label, 1, wx.ALL | wx.CENTER, 5)
-        self.left_sizer.Add(images_directory_sizer, 0, wx.EXPAND)
 
         # Pulsante documents_directory
         documents_directory_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.documents_directory_label = wx.StaticText(self.panel, label="Nessuna destinazione selezionata")
-        documents_directory_btn = wx.Button(self.panel, label="Destinazione documenti...")
-        documents_directory_btn.Bind(wx.EVT_BUTTON, self.on_select_documents_directory)
-        documents_directory_sizer.Add(documents_directory_btn, 0, wx.ALL | wx.CENTER, 5)
+        self.documents_directory_btn = wx.Button(self.panel, label="Destinazione documenti...")
+        self.documents_directory_btn.Bind(wx.EVT_BUTTON, self.on_select_documents_directory)
+        documents_directory_sizer.Add(self.documents_directory_btn, 0, wx.ALL | wx.CENTER, 5)
         documents_directory_sizer.Add(self.documents_directory_label, 1, wx.ALL | wx.CENTER, 5)
         self.left_sizer.Add(documents_directory_sizer, 0, wx.EXPAND)
 
+        # Pulsante images_directory
+        images_directory_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.images_directory_btn = wx.Button(self.panel, label="Sorgente immagini...")
+        self.images_directory_btn.Bind(wx.EVT_BUTTON, self.on_select_images_directory)
+        images_directory_sizer.Add(self.images_directory_btn, 0, wx.ALL | wx.CENTER, 5)
+        self.left_sizer.Add(images_directory_sizer, 0, wx.EXPAND)
+        self.images_directory_btn.Enable(Configuration.get_are_images_inserted())
+
         # Pulsante template
         template_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        template_btn = wx.Button(self.panel, label="Genera template...")
-        template_btn.Bind(wx.EVT_BUTTON, self.on_select_template_directory)
-        template_sizer.Add(template_btn, 0, wx.ALL | wx.CENTER, 5)
+        self.template_btn = wx.Button(self.panel, label="Genera template...")
+        self.template_btn.Bind(wx.EVT_BUTTON, self.on_select_template_directory)
+        template_sizer.Add(self.template_btn, 0, wx.ALL | wx.CENTER, 5)
         self.left_sizer.Add(template_sizer, 0, wx.EXPAND)
 
         # Inserimento document_filename
@@ -72,12 +71,14 @@ class MainWindow(wx.Frame):
         self.document_subtitle_input.SetHint("Inserire un sottotitolo...")
         self.left_sizer.Add(wx.StaticText(self.panel, label="Sottotitolo dei documenti:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.document_subtitle_input, 0, wx.ALL | wx.EXPAND, 5)
+        self.document_subtitle_input.Enable(Configuration.get_is_subtitle_included())
 
         # Inserimento zip_filename
         self.zip_filename_input = wx.TextCtrl(self.panel, value=Configuration.get_zip_filename())
         self.zip_filename_input.SetHint("Inserire nome dello zip...")
         self.left_sizer.Add(wx.StaticText(self.panel, label="Nome file ZIP:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.zip_filename_input, 0, wx.ALL | wx.EXPAND, 5)
+        self.zip_filename_input.Enable(Configuration.get_are_documents_included_to_zip())
 
         # Inserimento documents_number
         self.documents_number_input = wx.TextCtrl(self.panel, style=wx.TE_PROCESS_ENTER, value=str(Configuration.get_documents_number()))
@@ -105,9 +106,7 @@ class MainWindow(wx.Frame):
         self.left_sizer.Add(wx.StaticText(self.panel, label="Filtri:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.global_filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
         self.filtered_questions_label = wx.StaticText(self.panel, label="Nessuna domanda filtrata.")
-        font_filtered_questions_label = self.filtered_questions_label.GetFont()
-        font_filtered_questions_label.MakeBold()
-        self.filtered_questions_label.SetFont(font_filtered_questions_label)
+        Utils.set_label(label=self.filtered_questions_label, text="Nessuna domanda filtrata.", bold=True, color=(255, 0, 0))
         self.left_sizer.Add(self.filtered_questions_label, 0, wx.ALL | wx.EXPAND, 5)
 
         # Aggiunta della sezione sinistra
@@ -156,7 +155,7 @@ class MainWindow(wx.Frame):
             if source_file_dialog.ShowModal() == wx.ID_CANCEL:
                 return
             source_file = source_file_dialog.GetPath()
-            self.source_file_label.SetLabel(source_file)
+            Utils.set_label(label=self.source_file_label, text="OK", bold=True, color=(0, 255, 0))
             Configuration.set_source_file(source_file)
             self.printer(f"📝 Sorgente selezionata: {source_file}")
             self.refresh_source()
@@ -176,7 +175,7 @@ class MainWindow(wx.Frame):
             if documents_directory_dialog.ShowModal() == wx.ID_CANCEL:
                 return
             documents_directory = documents_directory_dialog.GetPath()
-            self.documents_directory_label.SetLabel(documents_directory)
+            Utils.set_label(label=self.documents_directory_label, text="OK", bold=True, color=(0, 255, 0))
             Configuration.set_documents_directory(documents_directory)
             self.printer(f"📁 Destinazione documenti: {documents_directory}")
 
@@ -232,6 +231,7 @@ class MainWindow(wx.Frame):
             wx.MessageBox("Non è stata scelta la cartella di destinazione dei documenti.", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
             return
         
+        #TODO: inserire i controlli doppi
         if document_filename_value and document_title_value and documents_number_value.isdigit() and start_number_value.isdigit() and questions_number_value.isdigit():
             Configuration.set_document_filename(document_filename_value)
             Configuration.set_document_title(document_title_value)
@@ -267,6 +267,9 @@ class MainWindow(wx.Frame):
     def on_change_options_checkbox(self, e):
         for option, properties in self.control_options.items():
             getattr(Configuration, f"set_{option}")(properties["reference"].GetValue())
+        self.images_directory_btn.Enable(Configuration.get_are_images_inserted())
+        self.document_subtitle_input.Enable(Configuration.get_is_subtitle_included())
+        self.zip_filename_input.Enable(Configuration.get_are_documents_included_to_zip())
         self.refresh_cardinality()
 
     def run_examly(self):
@@ -276,9 +279,9 @@ class MainWindow(wx.Frame):
 
     def refresh_cardinality(self):
         if self.examly.is_ready():
-            self.filtered_questions_label.SetLabel(f"Domande filtrate: {str(self.examly.get_questions_cardinality())}")
+            Utils.set_label(label=self.filtered_questions_label, text=f"Domande filtrate: {str(self.examly.get_questions_cardinality())}", bold=True, color=(0, 0, 0))
         else:
-            self.filtered_questions_label.SetLabel(f"Nessuna domanda filtrata.")
+            Utils.set_label(label=self.filtered_questions_label, text="Nessuna domanda filtrata.", bold=True, color=(255, 0, 0))
 
     def refresh_source(self):
         self.examly.connect_source(web_mode=False, source=Configuration.get_source_file())
@@ -306,7 +309,7 @@ class MainWindow(wx.Frame):
         for filter, filter_items in self.checkboxes_filters.items():
             filters_sizer = wx.BoxSizer(wx.VERTICAL)
             filter_label = wx.StaticText(self.panel, label=f"{filter}:")
-            filter_label.SetForegroundColour(wx.Colour(0, 0, 255))
+            Utils.set_label(label=filter_label, text=f"{filter}:", bold=True, color=(0, 0, 255))
             filters_sizer.Add(filter_label, 0, wx.TOP | wx.LEFT, 5)
             for item in filter_items:
                 item["reference"] = wx.CheckBox(self.panel, label=str(item["label"]))

@@ -2,6 +2,7 @@ import json
 import subprocess
 import zipfile
 import os
+import wx
 
 class Utils:
     @staticmethod
@@ -63,4 +64,13 @@ class Utils:
         if not (ord('0') <= key_code <= ord('9')) and key_code != wx.WXK_BACK:
             return
         event.Skip()
+
+    @staticmethod
+    def set_label(label, text, bold, color):
+        label.SetLabel(text)
+        font = label.GetFont()
+        if bold:
+            font.MakeBold()
+        label.SetFont(font)
+        label.SetForegroundColour(wx.Colour(color))
 

@@ -45,7 +45,7 @@ class Configuration:
     start_number = 1
     questions_number = 10
     is_header_included = True
-    is_subtitle_included = True
+    is_subtitle_included = False
     are_pages_numbered = True
     are_documents_numbered = True
     are_questions_numbered = True
