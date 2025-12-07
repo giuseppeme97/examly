@@ -9,8 +9,7 @@ class Configuration:
 
     # ------------------------------- #
 
-    default_app_name = "Examly"
-    # TODO: rendere riservati i dati
+    default_app_name = "Examly (build: 20251207)"
     default_server = "mongodb://admin:password@localhost:27017/"
     default_db = "examly"
     default_fonts_list = ["Liberation Sans", "Liberation Serif"]
@@ -28,7 +27,7 @@ class Configuration:
 
     # ------------------------------- #
 
-    web_mode = None
+    web_mode = False
     source_file = None
     source_collection = None
     documents_directory = None
@@ -37,11 +36,11 @@ class Configuration:
 
     # ------------------------------- #
 
-    document_filename = ""
-    zip_filename = ""
+    document_filename = "exam"
+    zip_filename = "zip_exam"
     filters = {}
-    document_title = ""
-    document_subtitle = ""
+    document_title = "Compito di ???"
+    document_subtitle = "Segnare solo una delle quattro opzioni per ciascuna domanda."
     documents_number = 1
     start_number = 1
     questions_number = 10
@@ -534,11 +533,17 @@ class Configuration:
     @classmethod
     def get_selection_lists(cls):
         return cls.default_fonts_list, cls.default_languages_list
+    
+
+    @classmethod
+    def show_config(cls):
+        attributi = {k: v for k, v in cls.__dict__.items() if not k.startswith("__") and not callable(v)}
+        print(attributi)
+
 
     @classmethod
     def export_config(cls, file_path):
-        attributi = {k: v for k, v in cls.__dict__.items(
-        ) if not k.startswith("__") and not callable(v)}
+        attributi = {k: v for k, v in cls.__dict__.items() if not k.startswith("__") and not callable(v)}
 
         with open(file_path, "w") as file:
             json.dump(attributi, file, indent=4)

@@ -7,6 +7,7 @@ from db import MongoConnector
 class Source:
     def __init__(self) -> None:
         self.loaded = False
+        self.validated = False
         self.df = None
 
         if Configuration.get_is_web_mode():
@@ -178,8 +179,7 @@ class Source:
     def check_row(self, row: object) -> bool:
         base = []
         for filter in self.filters:
-            base.append(((row[filter] in Configuration.get_filter_values(filter)) if len(
-                Configuration.get_filter_values(filter)) > 0 else True))
+            base.append(((row[filter] in Configuration.get_filter_values(filter)) if len(Configuration.get_filter_values(filter)) > 0 else True))
 
         if Configuration.get_are_questions_single_included():
             return all(base) and (row[Configuration.get_include_denomination()] == Configuration.get_include_accept_denomination())

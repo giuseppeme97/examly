@@ -108,6 +108,9 @@ class MainWindow(wx.Frame):
         self.left_sizer.Add(wx.StaticText(self.panel, label="Filtri:"), 0, wx.ALL | wx.EXPAND, 5)
         self.left_sizer.Add(self.global_filters_sizer, 0, wx.ALL | wx.EXPAND, 5)
         self.filtered_questions_label = wx.StaticText(self.panel, label="Domande selezionate: 0")
+        font_filtered_questions_label = self.filtered_questions_label.GetFont()
+        font_filtered_questions_label.MakeBold()
+        self.filtered_questions_label.SetFont(font_filtered_questions_label)
         self.left_sizer.Add(self.filtered_questions_label, 0, wx.ALL | wx.EXPAND, 5)
 
         # Aggiunta della sezione sinistra
@@ -157,7 +160,7 @@ class MainWindow(wx.Frame):
             source_file = source_file_dialog.GetPath()
             self.source_file_label.SetLabel(source_file)
             Configuration.set_source_file(source_file)
-            self.printer(f"Sorgente selezionata: {source_file}")
+            self.printer(f"📝 Sorgente selezionata: {source_file}")
             self.refresh_source()
 
     def on_select_images_directory(self, e):
@@ -177,7 +180,7 @@ class MainWindow(wx.Frame):
             documents_directory = documents_directory_dialog.GetPath()
             self.documents_directory_label.SetLabel(documents_directory)
             Configuration.set_documents_directory(documents_directory)
-            self.printer(f"Destinazione documenti: {documents_directory}")
+            self.printer(f"📁 Destinazione documenti: {documents_directory}")
 
     def on_select_template_directory(self, e):
         with wx.DirDialog(self, "Destinazione template:", style=wx.DD_DEFAULT_STYLE) as template_directory_dialog:
@@ -193,7 +196,8 @@ class MainWindow(wx.Frame):
             Configuration.set_filter_values(filter, [item["name"] for item in filter_items if item["reference"].GetValue()])
 
         if self.examly.is_ready():
-            self.filtered_questions_label.SetLabel(f"Domande selezionate: {str(self.examly.get_questions_cardinality())}")
+            self.filtered_questions_label.SetLabel(f"Domande filtrate: {str(self.examly.get_questions_cardinality())}")
+
 
     def on_open_style_options(self, e):
         fonts, languages = Configuration.get_selection_lists()
@@ -210,19 +214,41 @@ class MainWindow(wx.Frame):
         dialog.Destroy()
 
     def on_start(self, e):
+        # CHECK
+        document_filename_value = self.document_filename_input.GetValue()
+        document_title_value = self.document_title_input.GetValue()
+        document_subtitle_value = self.document_subtitle_input.GetValue()
+        zip_filename_value = self.zip_filename_input.GetValue()
+        documents_number_value = self.documents_number_input.GetValue()
+        start_number_value = self.start_number_input.GetValue()
+        questions_number_value = self.questions_number_input.GetValue()
+        source_file_value = Configuration.get_source_file()
+        documents_directory_value = Configuration.get_documents_directory()
 
-        #TODO check
-        Configuration.set_document_filename(self.document_filename_input.GetValue())
-        Configuration.set_zip_filename(self.zip_filename_input.GetValue())
+        if not source_file_value:
+            wx.MessageBox("Non è stata caricata alcuna sorgente.", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
+            return
         
-        self.examly.console(Configuration.get_zip_filename())
-        Configuration.set_documents_number(int(self.documents_number_input.GetValue()))
-        Configuration.set_start_number(int(self.start_number_input.GetValue()))
-        Configuration.set_questions_number(int(self.questions_number_input.GetValue()))
-        Configuration.set_document_title(self.document_title_input.GetValue())
+        if not documents_directory_value:
+            wx.MessageBox("Non è stata scelta la cartella di destinazione dei documenti.", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
+            return
 
-        wx.MessageBox("Messaggio di prova!", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
+        if document_filename_value and document_title_value and documents_number_value.isdigit() and start_number_value.isdigit() and questions_number_value.isdigit():
+            # wx.MessageBox("Tutti i campi presenti.", "Ottimo!", wx.OK | wx.ICON_INFORMATION)
+            Configuration.set_document_filename(document_filename_value)
+            Configuration.set_document_title(document_title_value)
+            Configuration.set_document_subtitle(document_subtitle_value)
+            Configuration.set_zip_filename(zip_filename_value)
+            Configuration.set_documents_number(int(documents_number_value))
+            Configuration.set_start_number(int(start_number_value))
+            Configuration.set_questions_number(int(questions_number_value))
+        else:
+            wx.MessageBox("Uno o più campi obbligatori mancanti.", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
+            return
+        
+        # END CHECK
 
+        
         for filter, filter_items in self.checkboxes_filters.items():
             Configuration.set_filter_values(filter, [item["name"] for item in filter_items if item["reference"].GetValue()])
 
@@ -246,14 +272,18 @@ class MainWindow(wx.Frame):
             self.examly.write_exams()
             wx.CallAfter(self.on_complete)
 
-    # Aggiorna l'istanza con la nuoca sorgente
+    # Aggiorna l'istanza con la nuova sorgente
     def refresh_source(self):
         self.examly.connect_source(web_mode=False, source=Configuration.get_source_file())
-        self.refresh_filters()
-        self.main_sizer.Fit(self.panel)
-        self.Fit()
-        self.Centre()
-        self.on_change_filter(None)
+        if self.examly.is_ready():
+            self.refresh_filters()
+            self.main_sizer.Fit(self.panel)
+            self.Fit()
+            self.Centre()
+            self.on_change_filter(None)
+        else:
+            wx.MessageBox("Errore nel caricamento o nella validazione della sorgente.", "Attenzione!", wx.OK | wx.ICON_INFORMATION)
+
 
     def refresh_filters(self):
         self.global_filters_sizer.Clear(True)

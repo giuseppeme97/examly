@@ -11,7 +11,7 @@ class Examly():
     def __init__(self, console) -> None:
         self.console = console or print
         self.ready = False
-        self.console("Istanza di Examly creata.")
+        self.console("🚀 Istanza di Examly creata.")
         
     def connect_source(self, web_mode: bool, source: str) -> None:
         Configuration.set_is_web_mode(web_mode)
@@ -33,7 +33,7 @@ class Examly():
                     self.console(log["message"])
                     self.console(log["result"])
         else:
-            self.console("Errore nel caricamento della sorgente.")
+            self.console("❌ Errore nel caricamento della sorgente.")
 
     def is_ready(self) -> bool:
         return self.ready
@@ -132,7 +132,8 @@ class Examly():
         Configuration.set_zip_filename(value)
 
     def get_filters(self) -> dict:
-        return self.source.get_filters()
+        if self.source.is_validated():
+            return self.source.get_filters()
 
     def set_filters(self, filters: dict) -> None:
         for key, value in filters.items():
