@@ -165,7 +165,7 @@ class MainWindow(wx.Frame):
             if images_directory_dialog.ShowModal() == wx.ID_CANCEL:
                 return
             images_directory = images_directory_dialog.GetPath()
-            self.images_directory_label.SetLabel(images_directory)
+            Utils.set_label(label=self.images_directory_label, text="OK", bold=True, color=(0, 255, 0))
             Configuration.set_images_directory(images_directory)
             self.printer(f"Cartella immagini: {images_directory}")
             self.refresh_source()
@@ -191,6 +191,14 @@ class MainWindow(wx.Frame):
     def on_change_filter_value(self, e):
         for filter, filter_items in self.checkboxes_filters.items():
             Configuration.set_filter_values(filter, [item["name"] for item in filter_items if item["reference"].GetValue()])
+        self.refresh_cardinality()
+
+    def on_change_options_checkbox(self, e):
+        for option, properties in self.control_options.items():
+            getattr(Configuration, f"set_{option}")(properties["reference"].GetValue())
+        self.images_directory_btn.Enable(Configuration.get_are_images_inserted())
+        self.document_subtitle_input.Enable(Configuration.get_is_subtitle_included())
+        self.zip_filename_input.Enable(Configuration.get_are_documents_included_to_zip())
         self.refresh_cardinality()
 
     def on_open_style_options(self, e):
@@ -235,9 +243,9 @@ class MainWindow(wx.Frame):
         if document_filename_value and document_title_value and documents_number_value.isdigit() and start_number_value.isdigit() and questions_number_value.isdigit():
             Configuration.set_document_filename(document_filename_value)
             Configuration.set_document_title(document_title_value)
-            Configuration.set_document_subtitle(document_subtitle_value)
-            Configuration.set_zip_filename(zip_filename_value)
-            Configuration.set_documents_number(int(documents_number_value))
+            Configuration.set_document_subtitle(document_subtitle_value) ###
+            Configuration.set_zip_filename(zip_filename_value) ###
+            Configuration.set_documents_number(int(documents_number_value)) 
             Configuration.set_start_number(int(start_number_value))
             Configuration.set_questions_number(int(questions_number_value))
         else:
@@ -245,7 +253,6 @@ class MainWindow(wx.Frame):
             return
         # END CHECK
 
-        
         for filter, filter_items in self.checkboxes_filters.items():
             Configuration.set_filter_values(filter, [item["name"] for item in filter_items if item["reference"].GetValue()])
 
@@ -263,14 +270,6 @@ class MainWindow(wx.Frame):
     def on_complete(self, *e):
         if not self.worker_thread.is_alive():
             self.start_btn.Enable()
-
-    def on_change_options_checkbox(self, e):
-        for option, properties in self.control_options.items():
-            getattr(Configuration, f"set_{option}")(properties["reference"].GetValue())
-        self.images_directory_btn.Enable(Configuration.get_are_images_inserted())
-        self.document_subtitle_input.Enable(Configuration.get_is_subtitle_included())
-        self.zip_filename_input.Enable(Configuration.get_are_documents_included_to_zip())
-        self.refresh_cardinality()
 
     def run_examly(self):
         if self.examly.is_ready():

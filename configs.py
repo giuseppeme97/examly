@@ -9,7 +9,7 @@ class Configuration:
 
     # ------------------------------- #
 
-    default_app_name = "Examly (build: 20251207)"
+    default_app_name = "Examly (versione build: 20251207)"
     default_server = "mongodb://admin:password@localhost:27017/"
     default_db = "examly"
     default_fonts_list = ["Liberation Sans", "Liberation Serif"]

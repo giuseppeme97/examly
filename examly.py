@@ -156,70 +156,70 @@ class Examly():
     def set_questions_number(self, value) -> None:
         Configuration.set_questions_number(value)
 
-    def set_is_header_included(self, value=True) -> None:
+    def set_is_header_included(self, value) -> None:
         Configuration.set_is_header_included(value)
 
-    def set_is_subtitle_included(self, value=True) -> None:
+    def set_is_subtitle_included(self, value) -> None:
         Configuration.set_is_subtitle_included(value)
 
-    def set_are_pages_numbered(self, value=True) -> None:
+    def set_are_pages_numbered(self, value) -> None:
         Configuration.set_are_pages_numbered(value)
 
-    def set_are_documents_numbered(self, value=True) -> None:
+    def set_are_documents_numbered(self, value) -> None:
         Configuration.set_are_documents_numbered(value)
 
-    def set_are_questions_numbered(self, value=True) -> None:
+    def set_are_questions_numbered(self, value) -> None:
         Configuration.set_are_questions_numbered(value)
 
-    def set_are_questions_shuffled(self, value=True) -> None:
+    def set_are_questions_shuffled(self, value) -> None:
         Configuration.set_are_questions_shuffled(value)
 
-    def set_are_options_shuffled(self, value=True) -> None:
+    def set_are_options_shuffled(self, value) -> None:
         Configuration.set_are_options_shuffled(value)
 
-    def set_are_images_inserted(self, value=False) -> None:
+    def set_are_images_inserted(self, value) -> None:
         Configuration.set_are_images_inserted(value)
 
-    def set_are_solutions_exported(self, value=True) -> None:
+    def set_are_solutions_exported(self, value) -> None:
         Configuration.set_are_solutions_exported(value)
 
-    def set_are_raw_exported(self, value=False) -> None:
+    def set_are_raw_exported(self, value) -> None:
         Configuration.set_are_raw_exported(value)
 
-    def set_are_questions_single_included(self, value=False) -> None:
+    def set_are_questions_single_included(self, value) -> None:
         Configuration.set_are_questions_single_included(value)
 
-    def set_are_documents_included_to_zip(self, value=False) -> None:
+    def set_are_documents_included_to_zip(self, value) -> None:
         Configuration.set_are_documents_included_to_zip(value)
 
-    def set_exact_document_number(self, value=None) -> None:
+    def set_exact_document_number(self, value) -> None:
         Configuration.set_exact_document_number(value)
 
-    def set_font(self, value="Liberation Sans") -> None:
+    def set_font(self, value) -> None:
         Configuration.set_font(value)
 
-    def set_language(self, value="it-IT") -> None:
+    def set_language(self, value) -> None:
         Configuration.set_language(value)
 
-    def set_title_size(self, value=15) -> None:
+    def set_title_size(self, value) -> None:
         Configuration.set_title_size(value)
 
-    def set_subtitle_size(self, value=12) -> None:
+    def set_subtitle_size(self, value) -> None:
         Configuration.set_subtitle_size(value)
 
-    def set_questions_size(self, value=11) -> None:
+    def set_questions_size(self, value) -> None:
         Configuration.set_questions_size(value)
 
-    def set_images_size(self, value=3.5) -> None:
+    def set_images_size(self, value) -> None:
         Configuration.set_images_size(value)
 
-    def set_columns_number(self, value=2) -> None:
+    def set_columns_number(self, value) -> None:
         Configuration.set_columns_number(value)
 
-    def set_left_margin(self, value=1) -> None:
+    def set_left_margin(self, value) -> None:
         Configuration.set_left_margin(value)
 
-    def set_right_margin(self, value=1) -> None:
+    def set_right_margin(self, value) -> None:
         Configuration.set_right_margin(value)
 
 
