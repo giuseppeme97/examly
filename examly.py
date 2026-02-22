@@ -28,8 +28,10 @@ class Examly():
         else:
             self.ready = False
             self.console("❌ Errore nel caricamento o nella validazione della sorgente.")
-            for log in self.source.get_logs():
-                self.console(f"💬 {log["message"]} Righe: {log["result"]}")
+
+            if self.source.get_logs():
+                for log in self.source.get_logs():
+                    self.console(f"💬 {log["message"]} Righe: {log["result"]}")
             
 
     def is_ready(self) -> bool:
@@ -224,8 +226,8 @@ class Examly():
 
 
 if __name__ == "__main__":
-    examly = Examly()
-    examly.connect_source(web_mode=False, source="inf.xlsx")
+    examly = Examly(console=None)
+    examly.connect_source(web_mode=False, source="Domande.xlsx")
     examly.set_documents_directory("/Users/giuseppe/Documents/examly/output")
     examly.set_images_directory("/Users/giuseppe/Documents/examly/images")
     examly.set_template_directory("/Users/giuseppe/Documents/examly/template")
@@ -233,15 +235,15 @@ if __name__ == "__main__":
     examly.set_zip_filename("compito")
     examly.set_filters({
         "MATERIA": ["INFORMATICA"],
-        "CLASSE": [],
-        "PERIODO": [],
+        "CLASSE": [5],
+        "PERIODO": [2],
         "SETTORE": []
     })
-    examly.set_document_title("Prova comune di Informatica - A.S. 2025/2026 - Classi 3F 3G 3H")
+    examly.set_document_title("Verifica scritta di Informatica - A.S. 2025/2026 - Classe 5H")
     examly.set_document_subtitle("Segnare solo una delle quattro opzioni per ciascuna domanda.")
-    examly.set_documents_number(3)
+    examly.set_documents_number(1)
     examly.set_start_number(1)
-    examly.set_questions_number(36)
+    examly.set_questions_number(40)
     examly.set_is_header_included(True)
     examly.set_is_subtitle_included(True)
     examly.set_are_pages_numbered(True)
