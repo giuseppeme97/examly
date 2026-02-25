@@ -60,6 +60,19 @@ class Examly():
                 random.shuffle(question['options'])
 
         return questions[0: Configuration.get_questions_number()]
+    
+    def show_all_questions(self) -> list[dict]:
+        return self.source.get_questions()
+    
+    def run_server(self):
+        from flask import Flask, render_template
+        app = Flask(__name__)
+
+        @app.route("/")
+        def _():
+            return render_template("index.html", questions=self.show_all_questions())
+
+        app.run(debug=False)
 
     def get_questions_cardinality(self) -> int:
         return len(self.source.get_questions())
@@ -224,7 +237,7 @@ class Examly():
     def set_right_margin(self, value) -> None:
         Configuration.set_right_margin(value)
 
-
+    
 if __name__ == "__main__":
     examly = Examly(console=None)
     examly.connect_source(web_mode=False, source="Domande.xlsx")
@@ -268,5 +281,6 @@ if __name__ == "__main__":
     examly.set_right_margin(1)
 
     if examly.is_ready():
-        examly.write_exams()
+        examly.run_server()
+        # examly.write_exams()
         # print("Domande filtrate:", examly.get_questions_cardinality())

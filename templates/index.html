@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px; /* Spazio tra le card */
+        }
+
+        .question {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .option {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            background-color: #e9ecef;
+        }
+
+        .correct {
+            background-color: #d4edda;
+            border: 1px solid #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Domande filtrate: {{ questions|length }}</h1>
+    {% for q in questions %}
+        <div class="card">
+            <div class="question">
+                {{ q.question }}
+            </div>
+
+            {% for option in q.options %}
+                <div class="option {% if option.correct %}correct{% endif %}">
+                    {{ option.text }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>
